@@ -1,6 +1,7 @@
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/DuesPortalApplication.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/config/CorsConfig.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/config/DataInitializer.java
+/Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/config/SpaWebConfig.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/controller/AnnouncementController.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/controller/AuthController.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/controller/ChatMessageController.java

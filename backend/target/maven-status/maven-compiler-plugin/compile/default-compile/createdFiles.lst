@@ -1,6 +1,7 @@
 com/association/duesportal/service/RegistrationCodeService.class
 com/association/duesportal/dto/AuthResponseDTO.class
 com/association/duesportal/repository/ChatMessageRepository.class
+com/association/duesportal/config/SpaWebConfig.class
 com/association/duesportal/config/CorsConfig.class
 com/association/duesportal/dto/GenerateCodeRequestDTO.class
 com/association/duesportal/dto/RedeemCodeRequestDTO.class
@@ -30,6 +31,7 @@ com/association/duesportal/dto/DashboardStatsDTO.class
 com/association/duesportal/controller/ChatMessageController.class
 com/association/duesportal/controller/NotificationController.class
 com/association/duesportal/model/ChatMessage.class
+com/association/duesportal/config/SpaWebConfig$1.class
 com/association/duesportal/controller/AnnouncementController.class
 com/association/duesportal/model/Member.class
 com/association/duesportal/service/DashboardService.class

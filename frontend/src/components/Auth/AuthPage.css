@@ -654,6 +654,63 @@
   margin: 0;
 }
 
+/* Admin Locked Card */
+.admin-locked-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  gap: 1rem;
+}
+
+.admin-locked-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.admin-locked-card h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.admin-locked-desc {
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.admin-locked-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.admin-contact-hint {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0;
+}
+
 @keyframes shake {
   0%, 100% {
     transform: translateX(0);
@@ -714,4 +771,101 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Distinct Member & Admin Portal Styling */
+.member-logo-gradient {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.45);
+}
+
+.admin-logo-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.circle-admin-1 {
+  width: 500px;
+  height: 500px;
+  background: #4338ca;
+  top: -120px;
+  right: 15%;
+}
+
+.circle-admin-2 {
+  width: 450px;
+  height: 450px;
+  background: #be185d;
+  bottom: -90px;
+  left: 15%;
+}
+
+.admin-return-bar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.return-member-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.return-member-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  transform: translateX(-2px);
+}
+
+.admin-portal-secluded-link {
+  margin-top: 1.75rem;
+  text-align: center;
+}
+
+.secluded-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #64748b;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secluded-admin-btn:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.member-submit-btn {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.member-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  transform: translateY(-1px);
+}
+
+.admin-card-border {
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.8), 0 0 30px rgba(99, 102, 241, 0.12);
 }

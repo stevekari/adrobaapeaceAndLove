@@ -50,20 +50,21 @@ public class AuthService {
         return new AuthResponseDTO(token, member, "Login successful. Welcome back, " + member.getFirstName() + "!");
     }
 
+    public boolean isAdminRegistered() {
+        return memberRepository.countByRole("ADMIN") > 0;
+    }
+
     public AuthResponseDTO registerAdmin(AdminRegisterRequestDTO request) {
+        if (memberRepository.countByRole("ADMIN") > 0) {
+            throw new IllegalArgumentException("An Admin account is already registered and active for Peace & Love, Adroabaa. Only one Admin is permitted. Please contact the administrator for access.");
+        }
+
         if (memberRepository.existsByEmailIgnoreCase(request.getEmail().trim())) {
             throw new IllegalArgumentException("A member or admin is already registered with email: " + request.getEmail().trim());
         }
 
-        String role = request.getRole() != null && !request.getRole().trim().isEmpty() 
-                ? request.getRole().trim().toUpperCase(Locale.ROOT) 
-                : "ADMIN";
-        
-        if (!"ADMIN".equals(role) && !"TREASURER".equals(role)) {
-            role = "ADMIN";
-        }
-
-        String prefix = "ADMIN".equals(role) ? "ADM" : "TRS";
+        String role = "ADMIN";
+        String prefix = "ADM";
         String memberCode = generateUniqueCode(prefix);
         String hashedPassword = PasswordUtil.hashPassword(request.getPassword());
 

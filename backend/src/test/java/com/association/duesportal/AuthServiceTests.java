@@ -24,7 +24,17 @@ public class AuthServiceTests {
 
     @Test
     void testAdminLoginWithEmail() {
-        LoginRequestDTO req = new LoginRequestDTO("stephen.karikari@association.org", "admin123");
+        Member admin = memberRepository.findByEmailIgnoreCase("stephen.karikari@association.org").orElseGet(() -> {
+            Member m = new Member(
+                    "Stephen", "Karikari", "stephen.karikari@association.org", "+233 24 123 4567",
+                    "14 Independence Avenue", "Accra", null, "IT Director",
+                    LocalDate.now(), "ACTIVE", "ADMIN",
+                    "ADM-1001", PasswordUtil.hashPassword("admin123"), true
+            );
+            return memberRepository.save(m);
+        });
+
+        LoginRequestDTO req = new LoginRequestDTO(admin.getEmail(), "admin123");
         AuthResponseDTO res = authService.login(req);
         assertNotNull(res);
         assertNotNull(res.getToken());
@@ -52,17 +62,29 @@ public class AuthServiceTests {
     }
 
     @Test
-    void testRegisterAdmin() {
-        AdminRegisterRequestDTO req = new AdminRegisterRequestDTO(
-                "Test", "Executive", "test.exec." + System.currentTimeMillis() + "@association.org", "+233 24 999 0000",
+    void testSingleAdminLockEnforcement() {
+        if (!authService.isAdminRegistered()) {
+            AdminRegisterRequestDTO primaryReq = new AdminRegisterRequestDTO(
+                    "Primary", "Admin", "primary.admin@association.org", "+233 24 111 2222",
+                    "admin123", "ADMIN", null
+            );
+            authService.registerAdmin(primaryReq);
+        }
+
+        assertTrue(authService.isAdminRegistered());
+
+        // Attempting to register another admin MUST fail
+        AdminRegisterRequestDTO secondReq = new AdminRegisterRequestDTO(
+                "Second", "Admin", "second.admin@association.org", "+233 24 999 0000",
                 "secret123", "ADMIN", null
         );
-        AuthResponseDTO res = authService.registerAdmin(req);
-        assertNotNull(res);
-        assertNotNull(res.getMemberCode());
-        assertTrue(res.getMemberCode().startsWith("ADM-"));
-        assertEquals("Test", res.getFirstName());
-        assertEquals("ADMIN", res.getRole());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            authService.registerAdmin(secondReq);
+        });
+
+        assertTrue(ex.getMessage().contains("already registered"));
+        assertTrue(ex.getMessage().contains("Only one Admin is permitted"));
     }
 
     @Test

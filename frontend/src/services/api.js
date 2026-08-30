@@ -36,6 +36,7 @@ async function fetchJSON(endpoint, options = {}) {
 export const api = {
   // Authentication
   login: (credentials) => fetchJSON('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
+  getAdminStatus: () => fetchJSON('/auth/admin-status'),
   registerAdmin: (adminData) => fetchJSON('/auth/register-admin', { method: 'POST', body: JSON.stringify(adminData) }),
   verifyMemberCode: (code) => fetchJSON(`/registration-codes/verify/${encodeURIComponent(code)}`).catch(() => fetchJSON(`/auth/verify-code/${encodeURIComponent(code)}`)),
   registerMemberWithCode: (data) => fetchJSON('/auth/register-member', { method: 'POST', body: JSON.stringify(data) }),

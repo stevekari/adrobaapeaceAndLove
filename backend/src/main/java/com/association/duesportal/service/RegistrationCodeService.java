@@ -107,10 +107,11 @@ public class RegistrationCodeService {
         if (optCode.isPresent()) {
             RegistrationCode rc = optCode.get();
             if ("REVOKED".equalsIgnoreCase(rc.getStatus())) {
-                throw new IllegalArgumentException("This registration code has been revoked by association leadership.");
+                throw new IllegalArgumentException("This registration code has been revoked by association leadership. Please contact your website admin for a valid code.");
             }
             if ("REDEEMED".equalsIgnoreCase(rc.getStatus())) {
-                throw new IllegalArgumentException("This registration code has already been redeemed.");
+                String redeemedName = rc.getRedeemedBy() != null ? rc.getRedeemedBy().getFullName() : (rc.getPreAssignedMember() != null ? rc.getPreAssignedMember().getFullName() : "another member");
+                throw new IllegalArgumentException("This registration code (" + cleanCode + ") has already been used and activated by " + redeemedName + ". Each code is strictly single-use and cannot be used again by a different person. Please contact your website admin for a new registration code.");
             }
             return new RegistrationCodeDTO(rc);
         }
@@ -119,8 +120,8 @@ public class RegistrationCodeService {
         Optional<Member> optMember = memberRepository.findByMemberCodeIgnoreCase(cleanCode);
         if (optMember.isPresent()) {
             Member member = optMember.get();
-            if (member.getIsPasswordSet()) {
-                throw new IllegalArgumentException("This member code is already activated. Please log in directly.");
+            if (Boolean.TRUE.equals(member.getIsPasswordSet())) {
+                throw new IllegalArgumentException("This member code (" + cleanCode + ") has already been registered and activated by " + member.getFullName() + ". It cannot be used again by anyone else. If this is your account, please sign in directly; otherwise, please contact your website admin for assistance.");
             }
             // Create corresponding RegistrationCode record for tracking
             RegistrationCode rc = new RegistrationCode(cleanCode, member.getRole(), "Member Directory Pre-Enrolled", member);
@@ -128,7 +129,7 @@ public class RegistrationCodeService {
             return new RegistrationCodeDTO(saved);
         }
 
-        throw new IllegalArgumentException("Invalid association registration code. Please contact association secretariat.");
+        throw new IllegalArgumentException("Invalid registration code (" + cleanCode + "). Please check your code or contact your website admin.");
     }
 
     public AuthResponseDTO redeemCode(RedeemCodeRequestDTO request) {
@@ -144,15 +145,16 @@ public class RegistrationCodeService {
                 .orElseGet(() -> {
                     // Check if member exists in MemberRepository
                     Member member = memberRepository.findByMemberCodeIgnoreCase(cleanCode)
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid registration code: " + cleanCode));
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid registration code (" + cleanCode + "). Please contact your website admin."));
                     return registrationCodeRepository.save(new RegistrationCode(cleanCode, member.getRole(), "Member Directory Enrolled", member));
                 });
 
         if ("REDEEMED".equalsIgnoreCase(regCode.getStatus())) {
-            throw new IllegalArgumentException("This association code has already been redeemed.");
+            String redeemedName = regCode.getRedeemedBy() != null ? regCode.getRedeemedBy().getFullName() : (regCode.getPreAssignedMember() != null ? regCode.getPreAssignedMember().getFullName() : "another person");
+            throw new IllegalArgumentException("This registration code (" + cleanCode + ") has already been used and registered by " + redeemedName + ". It cannot be used again by a different person. Please contact your website admin for a new registration code.");
         }
         if ("REVOKED".equalsIgnoreCase(regCode.getStatus())) {
-            throw new IllegalArgumentException("This registration code has been revoked.");
+            throw new IllegalArgumentException("This registration code has been revoked by association leadership. Please contact your website admin.");
         }
 
         Member memberToActivate;

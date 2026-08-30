@@ -23,16 +23,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // 1. Seed Primary Admin if no members exist
-        if (memberRepository.count() == 0) {
-            Member admin = new Member(
-                    "Stephen", "Karikari", "stephen.karikari@association.org", "+233 24 123 4567",
-                    "14 Independence Avenue, Airport Residential", "Accra", null, "Senior IT Director",
-                    LocalDate.of(2023, 1, 15), "ACTIVE", "ADMIN",
-                    "ADM-1001", PasswordUtil.hashPassword("admin123"), true
-            );
-            memberRepository.save(admin);
-        }
+        // 1. Dues Schedule Categories Seeding
 
         // 2. Seed Standard Dues Purpose Categories if none exist
         if (duesScheduleRepository.count() == 0) {

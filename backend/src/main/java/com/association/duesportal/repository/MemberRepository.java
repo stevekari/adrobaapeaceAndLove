@@ -27,6 +27,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     long countByStatus(String status);
 
+    long countByRole(String role);
+
+    boolean existsByRole(String role);
+
     @Query("SELECT m FROM Member m WHERE " +
            "LOWER(m.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(m.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

@@ -100,6 +100,7 @@ public class RegistrationCodeServiceTests {
                 "anotherPass123"
         );
         Exception ex = assertThrows(IllegalArgumentException.class, () -> registrationCodeService.redeemCode(secondPersonReq));
-        assertTrue(ex.getMessage().contains("already been redeemed"));
+        assertTrue(ex.getMessage().contains("already been used"));
+        assertTrue(ex.getMessage().contains("contact your website admin"));
     }
 }

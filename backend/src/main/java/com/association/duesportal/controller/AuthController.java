@@ -29,6 +29,17 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/admin-status")
+    public ResponseEntity<Map<String, Object>> getAdminStatus() {
+        boolean hasAdmin = authService.isAdminRegistered();
+        return ResponseEntity.ok(Map.of(
+                "hasAdmin", hasAdmin,
+                "message", hasAdmin
+                        ? "An Admin account is already registered for Peace & Love, Adroabaa. Only one Admin is permitted."
+                        : "No Admin is registered yet. You may proceed with Admin setup."
+        ));
+    }
+
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody AdminRegisterRequestDTO adminRequest) {
         try {

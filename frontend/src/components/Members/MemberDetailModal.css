@@ -254,6 +254,15 @@
 }
 
 @media (max-width: 650px) {
+  .detail-modal-backdrop {
+    padding: 10px 8px;
+  }
+
+  .detail-modal-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+  }
+
   .detail-fin-summary-grid {
     grid-template-columns: 1fr;
   }
@@ -261,5 +270,10 @@
   .detail-user-banner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .detail-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

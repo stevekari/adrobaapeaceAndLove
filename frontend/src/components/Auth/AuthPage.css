@@ -79,7 +79,7 @@
   font-size: 1.85rem;
   font-weight: 800;
   letter-spacing: -0.025em;
-  color: #f8fafc;
+  color: #000000 !important;
   margin: 0 0 0.35rem 0;
 }
 
@@ -673,8 +673,17 @@
 }
 
 @media (max-width: 600px) {
+  .auth-page-container {
+    padding: 1.5rem 0.75rem;
+  }
+
   .auth-card {
-    padding: 1.5rem 1.25rem;
+    padding: 1.5rem 1.15rem;
+    border-radius: 16px;
+  }
+
+  .auth-portal-title {
+    font-size: 1.5rem;
   }
 
   .auth-row-2 {
@@ -687,5 +696,22 @@
 
   .auth-tabs-nav {
     flex-direction: column;
+  }
+
+  .auth-input-wrapper input, .auth-select {
+    font-size: 16px;
+    /* Prevents auto-zoom on iOS */
+    padding: 12px 14px 12px 38px;
+  }
+}
+
+@media (max-width: 480px) {
+  .code-search-box {
+    flex-direction: column;
+  }
+
+  .code-verify-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

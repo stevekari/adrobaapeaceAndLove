@@ -21,4 +21,17 @@
   padding: 28px 32px;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-light);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+  .announcement-modal-backdrop {
+    padding: 10px 8px;
+  }
+
+  .announcement-modal-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+  }
 }

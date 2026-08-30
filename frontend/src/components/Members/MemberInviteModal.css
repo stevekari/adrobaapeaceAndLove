@@ -294,6 +294,33 @@
   background: #0369a1;
 }
 
+@media (max-width: 600px) {
+  .invite-modal-backdrop {
+    padding: 10px 8px;
+  }
+
+  .invite-pass-card {
+    padding: 16px 14px;
+  }
+
+  .code-value {
+    font-size: 1.35rem;
+    letter-spacing: 0.06em;
+  }
+
+  .invite-modal-footer {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .invite-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;

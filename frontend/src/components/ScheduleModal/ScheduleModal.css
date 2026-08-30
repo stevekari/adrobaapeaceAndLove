@@ -190,3 +190,38 @@
 .btn-save:hover {
   background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
 }
+
+@media (max-width: 600px) {
+  .schedule-modal-backdrop {
+    padding: 10px 8px;
+  }
+
+  .schedule-modal-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .preset-chips {
+    flex-direction: column;
+  }
+
+  .preset-chip {
+    width: 100%;
+    text-align: center;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .btn-cancel, .btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+}

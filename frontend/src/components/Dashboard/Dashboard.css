@@ -493,3 +493,50 @@
     padding: 24px;
   }
 }
+
+@media (max-width: 600px) {
+  .dashboard-view {
+    gap: 18px;
+  }
+
+  .dashboard-banner {
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+  }
+
+  .banner-title {
+    font-size: 1.35rem;
+  }
+
+  .banner-desc {
+    font-size: 0.84rem;
+    margin-bottom: 16px;
+  }
+
+  .banner-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .banner-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .dashboard-section-card {
+    padding: 18px 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .table-responsive-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

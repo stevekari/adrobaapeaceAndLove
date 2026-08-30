@@ -463,3 +463,54 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  .dues-form-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+  }
+
+  .form-title {
+    font-size: 1.2rem;
+  }
+
+  .dues-purpose-quick-pills {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .purpose-pill {
+    padding: 10px 12px;
+    width: 100%;
+  }
+
+  .payment-methods-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .payment-method-card {
+    padding: 12px 8px;
+  }
+
+  .amount-input-box {
+    font-size: 1.3rem;
+  }
+
+  .form-input, .form-select {
+    font-size: 16px;
+    /* Prevents auto-zooming on iOS devices */
+    padding: 12px 14px;
+  }
+
+  .form-submit-btn {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .payment-methods-grid {
+    grid-template-columns: 1fr;
+  }
+}

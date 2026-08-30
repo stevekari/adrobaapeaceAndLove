@@ -501,8 +501,12 @@
 }
 
 @media (max-width: 600px) {
+  .receipt-modal-backdrop {
+    padding: 10px 8px;
+  }
+
   .official-receipt-card {
-    padding: 20px;
+    padding: 16px 12px;
   }
 
   .receipt-details-grid {

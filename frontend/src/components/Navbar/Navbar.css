@@ -372,3 +372,72 @@
     display: none;
   }
 }
+
+@media (max-width: 640px) {
+  .portal-navbar {
+    padding: 0 12px;
+    height: 62px;
+  }
+
+  .brand-icon-wrapper {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand-title {
+    font-size: 1rem;
+  }
+
+  .navbar-left {
+    gap: 8px;
+  }
+
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .user-profile-info {
+    display: none;
+  }
+
+  .navbar-user-profile {
+    padding: 2px;
+    background: transparent;
+    border: none;
+  }
+
+  .navbar-pay-cta {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .navbar-chat-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .navbar-chat-btn span,
+  .navbar-pay-cta span {
+    display: none;
+  }
+
+  .navbar-chat-btn,
+  .navbar-pay-cta {
+    padding: 8px;
+    border-radius: var(--radius-full);
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+
+  .navbar-icon-btn,
+  .navbar-logout-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+  }
+}

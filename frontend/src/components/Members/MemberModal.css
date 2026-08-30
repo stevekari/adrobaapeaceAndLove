@@ -124,7 +124,21 @@
 }
 
 @media (max-width: 600px) {
+  .member-modal-backdrop {
+    padding: 10px 8px;
+  }
+
+  .member-modal-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+  }
+
   .modal-row-2, .modal-row-3 {
     grid-template-columns: 1fr;
+  }
+
+  .modal-photo-upload-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

@@ -1,0 +1,314 @@
+/* Member Invite Pass Modal */
+.invite-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 20px;
+}
+
+.invite-modal-container {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  max-width: 520px;
+  width: 100%;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.invite-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  background: var(--slate-900);
+  color: #ffffff;
+}
+
+.invite-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invite-header-title h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.sparkle-amber {
+  color: #f59e0b;
+}
+
+.invite-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--slate-400);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.invite-close-btn:hover {
+  color: #ffffff;
+}
+
+/* Printable Pass Card */
+.invite-pass-card {
+  padding: 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pass-brand-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 2px dashed var(--slate-200);
+}
+
+.pass-brand-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pass-brand-icon {
+  color: #0284c7;
+}
+
+.pass-brand-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.pass-brand-sub {
+  font-size: 0.72rem;
+  color: var(--slate-500);
+  font-weight: 600;
+}
+
+.pass-verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pass-member-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pass-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pass-name-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pass-member-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  margin: 0;
+}
+
+.pass-member-meta {
+  font-size: 0.8rem;
+  color: var(--slate-500);
+}
+
+.pass-member-location {
+  font-size: 0.76rem;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+
+/* Code Showcase Box */
+.pass-code-showcase {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #0284c7;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0284c7;
+  letter-spacing: 0.08em;
+}
+
+.code-display-box {
+  background: #ffffff;
+  padding: 8px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.code-value {
+  font-size: 1.8rem;
+  font-weight: 900;
+  font-family: monospace;
+  color: var(--slate-900);
+  letter-spacing: 0.12em;
+}
+
+.code-instruction-hint {
+  font-size: 0.74rem;
+  color: var(--slate-500);
+  margin: 0;
+}
+
+/* Steps Box */
+.pass-steps-box {
+  background: var(--slate-50);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.steps-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--slate-700);
+  margin: 0 0 10px 0;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--slate-700);
+}
+
+.step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Footer Buttons */
+.invite-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--slate-50);
+  border-top: 1px solid var(--border-light);
+}
+
+.invite-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.invite-action-btn.btn-share {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.invite-action-btn.btn-share:hover {
+  background: #059669;
+}
+
+.invite-action-btn.btn-print {
+  background: var(--slate-200);
+  color: var(--slate-700);
+}
+
+.invite-action-btn.btn-print:hover {
+  background: var(--slate-300);
+}
+
+.invite-action-btn.btn-done {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.invite-action-btn.btn-done:hover {
+  background: #0369a1;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-member-pass, #printable-member-pass * {
+    visibility: visible;
+  }
+
+  #printable-member-pass {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+}

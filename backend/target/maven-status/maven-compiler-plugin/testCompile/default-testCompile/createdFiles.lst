@@ -1,0 +1,5 @@
+com/association/duesportal/AuthServiceTests.class
+com/association/duesportal/DuesPortalApplicationTests.class
+com/association/duesportal/ChatMessageServiceTests.class
+com/association/duesportal/NotificationServiceTests.class
+com/association/duesportal/RegistrationCodeServiceTests.class

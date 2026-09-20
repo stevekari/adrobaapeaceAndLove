@@ -8,6 +8,8 @@ import {
   Play, 
   Pause, 
   Image as ImageIcon, 
+  Camera,
+  Paperclip,
   Trash2, 
   ShieldCheck, 
   User, 
@@ -27,6 +29,9 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import { useTranslation } from '../../i18n/LanguageContext';
+import './ChatCenter.css';
+
+const QUICK_EMOJIS = ['😊', '😂', '🙏', '👍', '❤️', '🎉', '🤝', '💰', '🔥', '👏', '💯', '✨', '🙌', '💪', '🇬🇭', '⭐', '☕', '💡', '✅'];
 
 // Helper for distinct WhatsApp sender name colors in group chats
 const SENDER_COLORS = [
@@ -69,6 +74,9 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioBase64, setAudioBase64] = useState(null);
   const [playingAudioId, setPlayingAudioId] = useState(null);
+
+  // Emoji Picker & Attachment State
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Image Attachment State
   const [selectedImage, setSelectedImage] = useState(null);
@@ -718,50 +726,118 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
           </div>
         )}
 
-        {/* Input Bar & Actions */}
-        <div className="chat-input-toolbar">
-          {/* Active Audio Recording Indicator */}
-          {isRecording ? (
-            <div className="recording-active-bar animate-pulse">
-              <div className="recording-wave-dot"></div>
-              <span className="recording-timer">{t('chat.recording_voice')} ({recordingSeconds}s)...</span>
-              <button className="recording-btn stop" onClick={stopRecording} title="Finish recording">
-                <Check size={16} />
-                <span>{t('common.done')}</span>
-              </button>
-              <button className="recording-btn cancel" onClick={cancelRecording} title="Cancel recording">
-                <X size={16} />
-                <span>{t('common.cancel')}</span>
+        {/* ================= ⌨️ WHATSAPP MOBILE CHAT INPUT BAR ================= */}
+        <div className="whatsapp-chat-input-area">
+          {/* Quick Emoji Picker Tray */}
+          {showEmojiPicker && (
+            <div className="whatsapp-emoji-tray animate-slide-up">
+              <div className="whatsapp-emoji-scroll">
+                {QUICK_EMOJIS.map((emoji, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="whatsapp-emoji-btn"
+                    onClick={() => {
+                      setInputText((prev) => prev + emoji);
+                      textInputRef.current?.focus();
+                    }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="whatsapp-emoji-close"
+                onClick={() => setShowEmojiPicker(false)}
+                title="Close emojis"
+              >
+                <X size={15} />
               </button>
             </div>
+          )}
+
+          {/* Active Audio Recording Bar */}
+          {isRecording ? (
+            <div className="whatsapp-recording-bar animate-pulse">
+              <div className="whatsapp-rec-left">
+                <div className="whatsapp-rec-dot"></div>
+                <span className="whatsapp-rec-timer">
+                  {Math.floor(recordingSeconds / 60)}:{(recordingSeconds % 60).toString().padStart(2, '0')}
+                </span>
+                <span className="whatsapp-rec-hint">{t('chat.recording_voice')}...</span>
+              </div>
+              <div className="whatsapp-rec-actions">
+                <button 
+                  type="button" 
+                  className="whatsapp-rec-cancel-btn" 
+                  onClick={cancelRecording} 
+                  title="Cancel recording"
+                >
+                  <Trash2 size={18} />
+                </button>
+                <button 
+                  type="button" 
+                  className="whatsapp-floating-action-btn rec-stop" 
+                  onClick={stopRecording} 
+                  title="Finish recording"
+                >
+                  <Check size={20} />
+                </button>
+              </div>
+            </div>
           ) : audioBase64 ? (
-            <div className="recorded-preview-bar">
-              <Volume2 size={18} color="#10b981" />
-              <span className="preview-text">{t('chat.voice_note')} ({recordingSeconds}s)</span>
-              <button className="send-voice-btn" onClick={() => handleSendMessage(`🎙️ ${t('chat.voice_note')}`, "VOICE", audioBase64)}>
-                <Send size={15} />
-                <span>{t('common.send')}</span>
+            <div className="whatsapp-audio-preview-bar animate-slide-up">
+              <button 
+                type="button" 
+                className="whatsapp-rec-cancel-btn" 
+                onClick={() => { setAudioBase64(null); setAudioBlob(null); setRecordingSeconds(0); }}
+                title="Discard voice note"
+              >
+                <Trash2 size={18} />
               </button>
-              <button className="cancel-voice-btn" onClick={() => { setAudioBase64(null); setAudioBlob(null); }}>
-                <X size={15} />
+              <div className="whatsapp-audio-pill-track">
+                <Volume2 size={18} className="whatsapp-audio-pill-icon" />
+                <div className="whatsapp-audio-wave">
+                  <span className="w-bar active"></span>
+                  <span className="w-bar active"></span>
+                  <span className="w-bar active"></span>
+                  <span className="w-bar active"></span>
+                  <span className="w-bar active"></span>
+                </div>
+                <span className="whatsapp-audio-pill-time">
+                  {Math.floor(recordingSeconds / 60)}:{(recordingSeconds % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+              <button 
+                type="button" 
+                className="whatsapp-floating-action-btn send"
+                onClick={() => handleSendMessage(`🎙️ ${t('chat.voice_note')}`, "VOICE", audioBase64)}
+                title="Send Voice Note"
+              >
+                <Send size={18} />
               </button>
             </div>
           ) : (
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} 
-              className="chat-compose-form"
+              className="text-input-row"
             >
               {/* Image attachment preview if selected */}
               {imagePreview && (
-                <div className="image-preview-thumbnail">
+                <div className="whatsapp-image-preview-badge animate-scale-up">
                   <img src={imagePreview} alt="To send" />
-                  <button type="button" className="remove-img-btn" onClick={() => { setSelectedImage(null); setImagePreview(null); }}>
+                  <button 
+                    type="button" 
+                    className="whatsapp-remove-img" 
+                    onClick={() => { setSelectedImage(null); setImagePreview(null); }}
+                  >
                     <X size={12} />
                   </button>
                 </div>
               )}
 
-              {/* Photo upload button */}
+              {/* Hidden file input */}
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -769,54 +845,81 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                 style={{ display: 'none' }} 
                 onChange={handleImageSelect}
               />
-              <button 
-                type="button" 
-                className="toolbar-action-btn"
-                onClick={() => fileInputRef.current?.click()}
-                title="Attach photo or payment slip"
-                disabled={Boolean(editingMessage)}
-              >
-                <ImageIcon size={19} />
-              </button>
 
-              {/* Voice Record button */}
-              <button 
-                type="button" 
-                className="toolbar-action-btn mic-btn"
-                onClick={startRecording}
-                title="Record voice note"
-                disabled={Boolean(editingMessage)}
-              >
-                <Mic size={19} />
-              </button>
+              {/* Telegram & WhatsApp Style Main Rounded Input Pill */}
+              <div className="text-input-pill">
+                {/* Emoji / Smile Button */}
+                <button 
+                  type="button" 
+                  className={`whatsapp-pill-icon-btn emoji-toggle ${showEmojiPicker ? 'active' : ''}`}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  title="Insert emoji"
+                >
+                  <Smile size={20} />
+                </button>
 
-              {/* Text Input */}
-              <input 
-                ref={textInputRef}
-                type="text"
-                className="chat-text-input"
-                placeholder={
-                  editingMessage 
-                    ? `${t('chat.editing_message')}...` 
-                    : replyingTo 
-                    ? `${t('chat.replying_to')} ${replyingTo.senderName}...` 
-                    : t('chat.type_message')
-                }
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                disabled={isSending}
-              />
+                {/* Text Input Area */}
+                <input 
+                  ref={textInputRef}
+                  type="text"
+                  className="whatsapp-pill-input"
+                  placeholder={
+                    editingMessage 
+                      ? `${t('chat.editing_message')}...` 
+                      : replyingTo 
+                      ? `${t('chat.replying_to')} ${replyingTo.senderName}...` 
+                      : t('chat.type_message')
+                  }
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onFocus={() => setShowEmojiPicker(false)}
+                  disabled={isSending}
+                />
 
-              {/* Send Button */}
-              <button 
-                type="submit" 
-                className={`chat-send-btn ${editingMessage ? 'edit-mode-btn' : ''}`}
-                disabled={isSending || (!inputText.trim() && !imagePreview)}
-                title={editingMessage ? t('common.save') : t('common.send')}
-              >
-                {editingMessage ? <Check size={18} /> : <Send size={17} />}
-                <span className="send-label">{editingMessage ? t('common.save') : t('common.send')}</span>
-              </button>
+                {/* Paperclip / Attachment Button */}
+                <button 
+                  type="button" 
+                  className="whatsapp-pill-icon-btn attach-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach photo or document"
+                  disabled={Boolean(editingMessage)}
+                >
+                  <Paperclip size={19} />
+                </button>
+
+                {/* Camera / Photo Button (visible if text is empty) */}
+                {!inputText.trim() && !editingMessage && (
+                  <button 
+                    type="button" 
+                    className="whatsapp-pill-icon-btn camera-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Camera / Photos"
+                  >
+                    <Camera size={19} />
+                  </button>
+                )}
+              </div>
+
+              {/* Floating Action Button (Mic or Send / Check) */}
+              {inputText.trim() || imagePreview || editingMessage ? (
+                <button 
+                  type="submit" 
+                  className={`whatsapp-floating-action-btn ${editingMessage ? 'edit-mode' : 'send'}`}
+                  disabled={isSending || (!inputText.trim() && !imagePreview)}
+                  title={editingMessage ? t('common.save') : t('common.send')}
+                >
+                  {editingMessage ? <Check size={19} /> : <Send size={18} />}
+                </button>
+              ) : (
+                <button 
+                  type="button" 
+                  className="whatsapp-floating-action-btn mic"
+                  onClick={startRecording}
+                  title="Tap to record voice note"
+                >
+                  <Mic size={19} />
+                </button>
+              )}
             </form>
           )}
         </div>

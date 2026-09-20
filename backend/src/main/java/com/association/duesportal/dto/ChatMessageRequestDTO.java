@@ -16,6 +16,12 @@ public class ChatMessageRequestDTO {
 
     private String attachmentData; // Optional base64 audio/image data
 
+    // WhatsApp Reply Support
+    private Long replyToId;
+    private String replyToSenderName;
+    private String replyToContent;
+    private String replyToMessageType;
+
     public ChatMessageRequestDTO() {
     }
 
@@ -35,6 +41,38 @@ public class ChatMessageRequestDTO {
         this.content = content;
         this.messageType = messageType != null ? messageType : "TEXT";
         this.attachmentData = attachmentData;
+    }
+
+    public Long getReplyToId() {
+        return replyToId;
+    }
+
+    public void setReplyToId(Long replyToId) {
+        this.replyToId = replyToId;
+    }
+
+    public String getReplyToSenderName() {
+        return replyToSenderName;
+    }
+
+    public void setReplyToSenderName(String replyToSenderName) {
+        this.replyToSenderName = replyToSenderName;
+    }
+
+    public String getReplyToContent() {
+        return replyToContent;
+    }
+
+    public void setReplyToContent(String replyToContent) {
+        this.replyToContent = replyToContent;
+    }
+
+    public String getReplyToMessageType() {
+        return replyToMessageType;
+    }
+
+    public void setReplyToMessageType(String replyToMessageType) {
+        this.replyToMessageType = replyToMessageType;
     }
 
     public Long getSenderId() {

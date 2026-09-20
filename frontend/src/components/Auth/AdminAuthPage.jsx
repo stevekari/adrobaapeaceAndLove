@@ -17,9 +17,13 @@ import {
 import confetti from 'canvas-confetti';
 import { api } from '../../services/api';
 import { signInWithGoogle } from '../../services/firebase';
+import { useTranslation } from '../../i18n/LanguageContext';
+import LanguageSelector from '../Navbar/LanguageSelector';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import './AuthPage.css';
 
 export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showToast }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   const [hasAdminAccount, setHasAdminAccount] = useState(false);
 
@@ -268,8 +272,8 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
       </div>
 
       <div className="auth-wrapper animate-fade-in">
-        {/* Navigation to Member Portal */}
-        <div className="admin-return-bar">
+        {/* Navigation & Language Actions */}
+        <div className="auth-top-bar">
           <button 
             type="button" 
             className="return-member-btn"
@@ -278,6 +282,10 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
             <ArrowLeft size={16} />
             <span>Switch to Member Portal</span>
           </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ThemeToggle />
+            <LanguageSelector />
+          </div>
         </div>
 
         {/* Brand Header */}

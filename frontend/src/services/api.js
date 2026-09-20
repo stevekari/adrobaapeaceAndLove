@@ -76,7 +76,16 @@ export const api = {
   // Chat & Messaging
   getChatMessages: (channel = 'GENERAL') => fetchJSON(`/chat/messages?channel=${encodeURIComponent(channel)}`),
   sendChatMessage: (payload) => fetchJSON('/chat/messages', { method: 'POST', body: JSON.stringify(payload) }),
-  deleteChatMessage: (id) => fetchJSON(`/chat/messages/${id}`, { method: 'DELETE' }),
+  editChatMessage: (id, payload) => fetchJSON(`/chat/messages/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  deleteChatMessage: (id, requesterId = null, requesterEmail = '', requesterRole = '') => {
+    const params = new URLSearchParams();
+    if (requesterId) params.append('requesterId', requesterId);
+    if (requesterEmail) params.append('requesterEmail', requesterEmail);
+    if (requesterRole) params.append('requesterRole', requesterRole);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return fetchJSON(`/chat/messages/${id}${queryString}`, { method: 'DELETE' });
+  },
+  permanentDeleteChatMessage: (id) => fetchJSON(`/chat/messages/${id}/permanent`, { method: 'DELETE' }),
 
   // Dashboard
   getDashboardStats: () => fetchJSON('/dashboard/stats'),
@@ -122,3 +131,5 @@ export const api = {
     fetchJSON(`/announcements/${id}`, { method: 'PUT', body: JSON.stringify(announcement) }),
   deleteAnnouncement: (id) => fetchJSON(`/announcements/${id}`, { method: 'DELETE' }),
 };
+
+export default api;

@@ -71,6 +71,36 @@ public class ChatMessageService {
         }
 
         ChatMessage message = new ChatMessage(sender, channel, content, messageType, request.getAttachmentData());
+
+        // WhatsApp Reply Support
+        if (request.getReplyToId() != null) {
+            message.setReplyToId(request.getReplyToId());
+            if (request.getReplyToSenderName() != null && !request.getReplyToSenderName().trim().isEmpty()) {
+                message.setReplyToSenderName(request.getReplyToSenderName().trim());
+            }
+            if (request.getReplyToContent() != null && !request.getReplyToContent().trim().isEmpty()) {
+                message.setReplyToContent(request.getReplyToContent().trim());
+            }
+            if (request.getReplyToMessageType() != null && !request.getReplyToMessageType().trim().isEmpty()) {
+                message.setReplyToMessageType(request.getReplyToMessageType().trim());
+            }
+
+            // If metadata was not supplied in request, look up from referenced message
+            if (message.getReplyToSenderName() == null || message.getReplyToContent() == null) {
+                chatMessageRepository.findById(request.getReplyToId()).ifPresent(repliedMsg -> {
+                    if (message.getReplyToSenderName() == null && repliedMsg.getSender() != null) {
+                        message.setReplyToSenderName(repliedMsg.getSender().getFullName());
+                    }
+                    if (message.getReplyToContent() == null) {
+                        message.setReplyToContent(repliedMsg.getContent());
+                    }
+                    if (message.getReplyToMessageType() == null) {
+                        message.setReplyToMessageType(repliedMsg.getMessageType());
+                    }
+                });
+            }
+        }
+
         ChatMessage saved = chatMessageRepository.save(message);
 
         // Generate Real Notification for the Association
@@ -90,7 +120,64 @@ public class ChatMessageService {
         return new ChatMessageDTO(saved);
     }
 
-    public void deleteMessage(Long messageId) {
+    public ChatMessageDTO editMessage(Long messageId, com.association.duesportal.dto.ChatMessageEditRequestDTO request) {
+        ChatMessage message = chatMessageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message not found with ID: " + messageId));
+
+        if (Boolean.TRUE.equals(message.getIsDeleted())) {
+            throw new IllegalArgumentException("Cannot edit a deleted message.");
+        }
+
+        if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+            throw new IllegalArgumentException("Edited message content cannot be empty.");
+        }
+
+        message.setContent(request.getContent().trim());
+        message.setIsEdited(true);
+        message.setEditedAt(java.time.LocalDateTime.now());
+
+        ChatMessage updated = chatMessageRepository.save(message);
+        return new ChatMessageDTO(updated);
+    }
+
+    public ChatMessageDTO deleteMessage(Long messageId, Long requesterId, String requesterEmail, String requesterRole) {
+        ChatMessage message = chatMessageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message not found with ID: " + messageId));
+
+        // Strict Ownership & Permission Validation
+        boolean isAdminOrTreasurer = requesterRole != null && 
+                ("ADMIN".equalsIgnoreCase(requesterRole.trim()) || "TREASURER".equalsIgnoreCase(requesterRole.trim()));
+
+        if (!isAdminOrTreasurer && (requesterId != null || requesterEmail != null)) {
+            boolean isOwner = false;
+            if (message.getSender() != null) {
+                if (requesterId != null && message.getSender().getId().equals(requesterId)) {
+                    isOwner = true;
+                } else if (requesterEmail != null && message.getSender().getEmail() != null &&
+                        message.getSender().getEmail().equalsIgnoreCase(requesterEmail.trim())) {
+                    isOwner = true;
+                }
+            }
+
+            if (!isOwner) {
+                throw new IllegalArgumentException("Permission Denied: You can only delete messages that you posted.");
+            }
+        }
+
+        message.setIsDeleted(true);
+        message.setDeletedAt(java.time.LocalDateTime.now());
+        message.setContent("🚫 This message was deleted");
+        message.setAttachmentData(null);
+
+        ChatMessage updated = chatMessageRepository.save(message);
+        return new ChatMessageDTO(updated);
+    }
+
+    public ChatMessageDTO deleteMessage(Long messageId) {
+        return deleteMessage(messageId, null, null, null);
+    }
+
+    public void permanentDeleteMessage(Long messageId) {
         if (!chatMessageRepository.existsById(messageId)) {
             throw new IllegalArgumentException("Message not found with ID: " + messageId);
         }

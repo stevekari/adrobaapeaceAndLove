@@ -11,7 +11,7 @@
 }
 
 .notification-drawer-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   overflow: hidden;
@@ -34,6 +34,37 @@
   gap: 10px;
 }
 
+.drawer-title-group.clickable {
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.drawer-title-group.clickable:hover {
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.drawer-title-group.clickable:hover .drawer-heading {
+  color: #0284c7;
+}
+
+.drawer-title-group.clickable:hover .heading-arrow {
+  transform: translateX(3px);
+  color: #0284c7;
+}
+
+.drawer-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.heading-arrow {
+  color: #94a3b8;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
 .bell-badge-icon {
   width: 34px;
   height: 34px;
@@ -43,13 +74,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .drawer-heading {
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--slate-900);
-  margin: 0 0 2px 0;
+  margin: 0;
+  transition: color 0.15s ease;
 }
 
 .drawer-subtitle {
@@ -207,4 +240,54 @@
   font-weight: 600;
   color: #0284c7;
   text-transform: capitalize;
+}
+
+.open-chat-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 6px;
+}
+
+.open-chat-empty-btn:hover {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+
+.drawer-footer {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.drawer-footer-chat-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+  transition: all 0.15s ease;
+}
+
+.drawer-footer-chat-btn:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
 }

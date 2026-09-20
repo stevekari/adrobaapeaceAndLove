@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.association.duesportal.AuthServiceTests
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.333 s -- in com.association.duesportal.AuthServiceTests
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.855 s -- in com.association.duesportal.AuthServiceTests

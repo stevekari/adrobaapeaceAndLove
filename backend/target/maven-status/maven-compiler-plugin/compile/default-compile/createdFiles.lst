@@ -45,6 +45,7 @@ com/association/duesportal/service/ChatMessageService.class
 com/association/duesportal/dto/ChatMessageDTO.class
 com/association/duesportal/dto/AdminRegisterRequestDTO.class
 com/association/duesportal/model/RegistrationCode.class
+com/association/duesportal/dto/ChatMessageEditRequestDTO.class
 com/association/duesportal/util/PasswordUtil.class
 com/association/duesportal/controller/MemberController.class
 com/association/duesportal/service/PaymentRecordService.class

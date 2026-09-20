@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import StatCard from '../StatCard/StatCard';
+import { useTranslation } from '../../i18n/LanguageContext';
 import './Dashboard.css';
 
 export default function Dashboard({ 
@@ -37,6 +38,7 @@ export default function Dashboard({
   onUpdateStatus,
   userRole 
 }) {
+  const { t } = useTranslation();
   const [copiedId, setCopiedId] = React.useState(null);
 
   const handleCopyCode = (code, id) => {
@@ -86,11 +88,11 @@ export default function Dashboard({
           <div className="banner-actions">
             <button className="banner-btn btn-primary" onClick={onOpenPayModal}>
               <CreditCard size={17} />
-              <span>{userRole === 'ADMIN' ? 'Record Dues Payment' : 'Pay My Dues Online'}</span>
+              <span>{userRole === 'ADMIN' ? (t('nav.record_dues') || 'Record Dues Payment') : (t('nav.pay_dues') || 'Pay My Dues Online')}</span>
             </button>
             <button className="banner-btn btn-outline" onClick={() => onNavigateTab('chat')}>
               <Megaphone size={16} />
-              <span>💬 Member Chat & Support</span>
+              <span>💬 {t('nav.chat') || 'Member Chat & Support'}</span>
             </button>
             {userRole === 'ADMIN' && (
               <>
@@ -117,7 +119,7 @@ export default function Dashboard({
       {/* KPI Stat Cards Grid */}
       <div className="stat-cards-grid">
         <StatCard
-          title="Total Dues Collected"
+          title={t('dashboard.total_collected') || 'Total Dues Collected'}
           value={`$${totalCollected}`}
           subtitle="Lifetime verified contributions"
           icon={DollarSign}
@@ -128,7 +130,7 @@ export default function Dashboard({
           actionHint="View Payment Ledger →"
         />
         <StatCard
-          title="Active Members"
+          title={t('dashboard.active_members') || 'Active Members'}
           value={activeMembers.toString()}
           subtitle={`Out of ${stats?.totalMembersCount || activeMembers} registered`}
           icon={Users}
@@ -139,7 +141,7 @@ export default function Dashboard({
           actionHint="View Member Directory →"
         />
         <StatCard
-          title="Overall Compliance"
+          title={t('dashboard.collection_rate') || 'Overall Compliance'}
           value={`${collectionRate}%`}
           subtitle="Target levy fulfillment"
           icon={TrendingUp}

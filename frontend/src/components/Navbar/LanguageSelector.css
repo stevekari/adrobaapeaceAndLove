@@ -1,0 +1,133 @@
+/* Language Selector Dropdown Styling */
+.language-selector-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.language-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--slate-100, #f1f5f9);
+  border: 1px solid var(--slate-200, #e2e8f0);
+  border-radius: 20px;
+  color: var(--slate-700, #334155);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.language-trigger-btn:hover,
+.language-trigger-btn.active {
+  background: var(--slate-200, #e2e8f0);
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+.lang-flag {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.lang-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.lang-chevron {
+  color: var(--slate-400, #94a3b8);
+  transition: transform 0.2s ease;
+}
+
+.lang-chevron.open {
+  transform: rotate(180deg);
+}
+
+.language-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 170px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+  z-index: 1100;
+  overflow: hidden;
+  padding: 4px;
+}
+
+.language-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.language-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.language-option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.language-option-item:hover {
+  background: #f0f9ff;
+  color: #0284c7;
+}
+
+.language-option-item.selected {
+  background: #e0f2fe;
+  color: #0284c7;
+  font-weight: 700;
+}
+
+.option-flag {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.option-label {
+  flex: 1;
+}
+
+.option-check {
+  color: #0284c7;
+  margin-left: auto;
+}
+
+/* Compact version for mobile header / auth pages */
+.language-selector-wrapper.compact .language-trigger-btn {
+  padding: 5px 8px;
+}
+
+.language-selector-wrapper.compact .lang-name {
+  display: none;
+}

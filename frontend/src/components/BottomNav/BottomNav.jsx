@@ -11,6 +11,7 @@ import {
   Sparkles,
   CalendarClock
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/LanguageContext';
 import './BottomNav.css';
 
 export default function BottomNav({ 
@@ -23,31 +24,32 @@ export default function BottomNav({
   setSidebarOpen,
   unreadCount = 0
 }) {
+  const { t } = useTranslation();
   const isAdmin = userRole === 'ADMIN' || userRole === 'TREASURER';
 
   const memberTabs = [
     {
       id: 'dashboard',
-      label: 'Home',
+      label: t('nav.dashboard'),
       icon: Home,
       badge: null
     },
     {
       id: 'chat',
-      label: 'Chat',
+      label: t('nav.chat'),
       icon: MessageSquare,
       badge: unreadCount > 0 ? unreadCount : null,
       isDot: unreadCount === 0
     },
     {
       id: 'pay-dues',
-      label: 'Pay Dues',
+      label: t('nav.pay_dues'),
       icon: CreditCard,
       isCenterAction: true
     },
     {
       id: 'history',
-      label: 'Receipts',
+      label: t('nav.history'),
       icon: Receipt,
       badge: null
     },
@@ -62,25 +64,25 @@ export default function BottomNav({
   const adminTabs = [
     {
       id: 'dashboard',
-      label: 'Home',
+      label: t('nav.dashboard'),
       icon: Home,
       badge: null
     },
     {
       id: 'members',
-      label: 'Members',
+      label: t('nav.members'),
       icon: Users,
       badge: null
     },
     {
       id: 'pay-dues',
-      label: 'Record',
+      label: t('nav.record_dues'),
       icon: CreditCard,
       isCenterAction: true
     },
     {
       id: 'codes',
-      label: 'Codes',
+      label: t('nav.codes'),
       icon: KeyRound,
       badge: null
     },

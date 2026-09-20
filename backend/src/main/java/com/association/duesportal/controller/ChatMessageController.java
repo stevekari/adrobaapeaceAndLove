@@ -36,10 +36,34 @@ public class ChatMessageController {
         }
     }
 
-    @DeleteMapping("/messages/{id}")
-    public ResponseEntity<?> deleteMessage(@PathVariable Long id) {
+    @PutMapping("/messages/{id}")
+    public ResponseEntity<?> editMessage(@PathVariable Long id, @RequestBody com.association.duesportal.dto.ChatMessageEditRequestDTO request) {
         try {
-            chatMessageService.deleteMessage(id);
+            ChatMessageDTO updated = chatMessageService.editMessage(id, request);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/messages/{id}")
+    public ResponseEntity<?> deleteMessage(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long requesterId,
+            @RequestParam(required = false) String requesterEmail,
+            @RequestParam(required = false) String requesterRole) {
+        try {
+            ChatMessageDTO deleted = chatMessageService.deleteMessage(id, requesterId, requesterEmail, requesterRole);
+            return ResponseEntity.ok(deleted);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/messages/{id}/permanent")
+    public ResponseEntity<?> permanentDeleteMessage(@PathVariable Long id) {
+        try {
+            chatMessageService.permanentDeleteMessage(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

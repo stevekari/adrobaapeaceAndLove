@@ -9,7 +9,8 @@ import {
   Info, 
   X, 
   ExternalLink,
-  Clock
+  Clock,
+  ArrowRight
 } from 'lucide-react';
 import { api } from '../../services/api';
 import './NotificationDrawer.css';
@@ -56,23 +57,28 @@ export default function NotificationDrawer({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
 
-  const handleMarkAsRead = async (id, linkTab, e) => {
-    e.stopPropagation();
+  const handleNotificationClick = async (n) => {
     try {
-      await api.markNotificationRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      );
-      if (linkTab && onNavigateTab) {
-        onNavigateTab(linkTab);
-        onClose();
+      if (!n.isRead) {
+        await api.markNotificationRead(n.id);
+        setNotifications((prev) =>
+          prev.map((item) => (item.id === n.id ? { ...item, isRead: true } : item))
+        );
       }
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
     }
+
+    // Target tab: default to 'chat' (message place) unless specific linkTab is provided
+    const targetTab = (n.linkTab && n.linkTab.trim()) ? n.linkTab.trim().toLowerCase() : 'chat';
+    if (onNavigateTab) {
+      onNavigateTab(targetTab);
+      onClose();
+    }
   };
 
-  const handleMarkAllRead = async () => {
+  const handleMarkAllRead = async (e) => {
+    e.stopPropagation();
     if (!currentUser) return;
     try {
       await api.markAllNotificationsRead(currentUser.id);
@@ -109,16 +115,26 @@ export default function NotificationDrawer({
   return (
     <div className="notification-drawer-overlay animate-fade-in" ref={drawerRef}>
       <div className="notification-drawer-card">
-        {/* Header */}
+        {/* Header - Clicking Association Activity Alerts navigates to Messages/Chat */}
         <div className="drawer-header">
-          <div className="drawer-title-group">
+          <div 
+            className="drawer-title-group clickable" 
+            onClick={() => {
+              if (onNavigateTab) onNavigateTab('chat');
+              onClose();
+            }}
+            title="Open Community Messages & Chat"
+          >
             <div className="bell-badge-icon">
               <Bell size={18} />
             </div>
             <div>
-              <h3 className="drawer-heading">Association Activity Alerts</h3>
+              <div className="drawer-heading-row">
+                <h3 className="drawer-heading">Association Activity Alerts</h3>
+                <ArrowRight size={13} className="heading-arrow" />
+              </div>
               <span className="drawer-subtitle">
-                {unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
+                {unreadCount > 0 ? `${unreadCount} unread · Tap to view messages` : 'Tap to open messages'}
               </span>
             </div>
           </div>
@@ -148,13 +164,25 @@ export default function NotificationDrawer({
             <div className="drawer-empty-state">
               <Bell size={36} color="#cbd5e1" />
               <p>No new notifications right now.</p>
+              <button 
+                type="button" 
+                className="open-chat-empty-btn"
+                onClick={() => {
+                  if (onNavigateTab) onNavigateTab('chat');
+                  onClose();
+                }}
+              >
+                <MessageSquare size={14} />
+                <span>Open Community Chat Room</span>
+              </button>
             </div>
           ) : (
             notifications.map((n) => (
               <div 
                 key={n.id} 
                 className={`notification-item-row ${!n.isRead ? 'unread' : ''}`}
-                onClick={(e) => handleMarkAsRead(n.id, n.linkTab, e)}
+                onClick={() => handleNotificationClick(n)}
+                title="Click to view message and discussion"
               >
                 <div className="notification-icon-box">
                   {getIcon(n.type)}
@@ -172,20 +200,33 @@ export default function NotificationDrawer({
                       <Clock size={11} />
                       {formatTime(n.createdAt)}
                     </span>
-                    {n.linkTab && (
-                      <span className="notif-link-badge">
-                        <span>Open {n.linkTab}</span>
-                        <ExternalLink size={11} />
-                      </span>
-                    )}
+                    <span className="notif-link-badge">
+                      <span>View Message</span>
+                      <ExternalLink size={11} />
+                    </span>
                   </div>
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* Bottom Quick Action Footer */}
+        <div className="drawer-footer">
+          <button 
+            type="button" 
+            className="drawer-footer-chat-btn"
+            onClick={() => {
+              if (onNavigateTab) onNavigateTab('chat');
+              onClose();
+            }}
+          >
+            <MessageSquare size={15} />
+            <span>Open Community Chat & Support</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-

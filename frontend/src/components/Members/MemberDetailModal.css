@@ -14,7 +14,7 @@
 }
 
 .member-detail-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   max-width: 780px;
   width: 100%;

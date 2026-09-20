@@ -21,9 +21,13 @@ import {
 import confetti from 'canvas-confetti';
 import { api } from '../../services/api';
 import { signInWithGoogle } from '../../services/firebase';
+import { useTranslation } from '../../i18n/LanguageContext';
+import LanguageSelector from '../Navbar/LanguageSelector';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import './AuthPage.css';
 
 export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showToast }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'code-register'
   
   // Login Form State
@@ -297,6 +301,12 @@ export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showTo
       </div>
 
       <div className="auth-wrapper animate-fade-in">
+        {/* Top Actions: Theme Toggle & Language Selector */}
+        <div className="auth-top-bar member-top-bar">
+          <ThemeToggle />
+          <LanguageSelector />
+        </div>
+
         {/* Brand Header */}
         <div className="auth-brand-header">
           <div className="auth-brand-logo member-logo-gradient">

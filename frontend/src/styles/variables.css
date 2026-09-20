@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme="light"] {
   /* Color Palette - Modern Association & Fintech Tone */
   --primary-50: #eef2ff;
   --primary-100: #e0e7ff;
@@ -33,7 +34,7 @@
   --rose-500: #f43f5e;
   --rose-600: #e11d48;
 
-  /* Neutral Slate */
+  /* Neutral Slate (Light) */
   --slate-50: #f8fafc;
   --slate-100: #f1f5f9;
   --slate-200: #e2e8f0;
@@ -49,6 +50,7 @@
   /* Surface & Background */
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
   --bg-sidebar: #0f172a;
   --bg-glass: rgba(255, 255, 255, 0.85);
 
@@ -82,4 +84,58 @@
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ========================================================
+   🌙 DARK THEME PALETTE
+   ======================================================== */
+[data-theme="dark"] {
+  /* Primary Tint Adjustments for Dark Backgrounds */
+  --primary-50: rgba(99, 102, 241, 0.15);
+  --primary-100: rgba(99, 102, 241, 0.25);
+  --primary-200: rgba(99, 102, 241, 0.35);
+
+  /* Emerald Tint Adjustments */
+  --emerald-50: rgba(16, 185, 129, 0.15);
+  --emerald-100: rgba(16, 185, 129, 0.25);
+
+  /* Amber Tint Adjustments */
+  --amber-50: rgba(245, 158, 11, 0.15);
+  --amber-100: rgba(245, 158, 11, 0.25);
+
+  /* Rose Tint Adjustments */
+  --rose-50: rgba(244, 63, 94, 0.15);
+  --rose-100: rgba(244, 63, 94, 0.25);
+
+  /* Neutral Slate (Inverted for Dark Mode) */
+  --slate-50: #0e1726;
+  --slate-100: #172338;
+  --slate-200: #23344d;
+  --slate-300: #374b68;
+  --slate-400: #8899b0;
+  --slate-500: #9cb1cc;
+  --slate-600: #cbd5e1;
+  --slate-700: #e2e8f0;
+  --slate-800: #f1f5f9;
+  --slate-900: #ffffff;
+  --slate-950: #ffffff;
+
+  /* Surface & Background (Deep Navy Dark) */
+  --bg-main: #0b1120;
+  --bg-card: #131d33;
+  --bg-card-hover: #192744;
+  --bg-sidebar: #080d19;
+  --bg-glass: rgba(19, 29, 51, 0.88);
+
+  /* Borders & Shadows */
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.16);
+  --border-focus: rgba(129, 140, 248, 0.5);
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 30px -8px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.35);
+  --shadow-emerald-glow: 0 0 25px rgba(16, 185, 129, 0.35);
 }

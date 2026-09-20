@@ -10,6 +10,9 @@ import {
   User
 } from 'lucide-react';
 import NotificationDrawer from './NotificationDrawer';
+import LanguageSelector from './LanguageSelector';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import { useTranslation } from '../../i18n/LanguageContext';
 import { api } from '../../services/api';
 import './Navbar.css';
 
@@ -24,6 +27,7 @@ export default function Navbar({
   setSidebarOpen,
   announcementsCount 
 }) {
+  const { t } = useTranslation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -47,15 +51,15 @@ export default function Navbar({
 
   const getTabTitle = () => {
     switch (currentTab) {
-      case 'dashboard': return userRole === 'ADMIN' ? 'Admin Executive Dashboard' : 'Member Portal Dashboard';
-      case 'codes': return 'Official Registration Code Generator';
-      case 'chat': return 'Member Community Chat & Support';
-      case 'profile': return 'My Profile & Preferences';
-      case 'pay-dues': return userRole === 'ADMIN' ? 'Record Dues Payment' : 'Pay My Dues';
-      case 'history': return userRole === 'ADMIN' ? 'Payment Transactions & Receipts' : 'My Payment History & Receipts';
-      case 'schedules': return 'Dues Schedules & Levies';
-      case 'members': return 'Association Member Directory';
-      case 'announcements': return 'Notice Board & Bulletins';
+      case 'dashboard': return userRole === 'ADMIN' ? `${t('common.admin')} ${t('nav.dashboard')}` : `${t('common.member')} ${t('nav.dashboard')}`;
+      case 'codes': return t('nav.codes');
+      case 'chat': return t('nav.chat');
+      case 'profile': return t('nav.profile');
+      case 'pay-dues': return userRole === 'ADMIN' ? t('nav.record_dues') : t('nav.pay_dues');
+      case 'history': return t('nav.history');
+      case 'schedules': return t('nav.schedules');
+      case 'members': return t('nav.members');
+      case 'announcements': return t('nav.announcements');
       default: return 'Portal';
     }
   };
@@ -96,6 +100,12 @@ export default function Navbar({
       </div>
 
       <div className="navbar-right">
+        {/* Dark / Light Mode Switch */}
+        <ThemeToggle />
+
+        {/* Multi-Language Selector Dropdown */}
+        <LanguageSelector />
+
         {/* Quick Community Chat Button */}
         <button 
           className={`navbar-chat-btn ${currentTab === 'chat' ? 'active' : ''}`}
@@ -103,13 +113,13 @@ export default function Navbar({
           title="Open Community Chat & Support"
         >
           <MessageSquare size={16} />
-          <span>Member Chat</span>
+          <span>{t('nav.chat')}</span>
         </button>
 
         {/* Quick Pay CTA */}
         <button className="navbar-pay-cta" onClick={onOpenPayModal}>
           <CreditCard size={17} />
-          <span>{userRole === 'ADMIN' ? 'Record Dues' : 'Pay Dues'}</span>
+          <span>{userRole === 'ADMIN' ? t('nav.record_dues') : t('nav.pay_dues')}</span>
         </button>
 
         {/* Interactive Real Notification Bell */}
@@ -179,7 +189,7 @@ export default function Navbar({
             aria-label="Logout"
           >
             <LogOut size={16} />
-            <span className="logout-btn-text">Logout</span>
+            <span className="logout-btn-text">{t('nav.logout')}</span>
           </button>
         </div>
       </div>

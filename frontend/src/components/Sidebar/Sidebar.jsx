@@ -16,6 +16,7 @@ import {
   X,
   ShieldCheck
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/LanguageContext';
 import './Sidebar.css';
 
 export default function Sidebar({ 
@@ -28,102 +29,103 @@ export default function Sidebar({
   onLogout, 
   stats 
 }) {
+  const { t } = useTranslation();
   const isAdmin = userRole === 'ADMIN' || userRole === 'TREASURER';
 
   const navItems = isAdmin ? [
     {
       id: 'dashboard',
-      label: 'Admin Dashboard',
+      label: `${t('common.admin')} ${t('nav.dashboard')}`,
       icon: LayoutDashboard,
       badge: null,
     },
     {
       id: 'codes',
-      label: 'Registration Codes',
+      label: t('nav.codes'),
       icon: KeyRound,
       badge: 'Generator',
       badgeClass: 'badge-emerald',
     },
     {
       id: 'chat',
-      label: 'Member Chat & Support',
+      label: t('nav.chat'),
       icon: Megaphone,
       badge: 'Live',
       badgeClass: 'badge-emerald',
     },
     {
       id: 'pay-dues',
-      label: 'Record Dues Payment',
+      label: t('nav.record_dues'),
       icon: CreditCard,
       badge: 'Quick Pay',
       badgeClass: 'badge-emerald',
     },
     {
       id: 'history',
-      label: 'All Transactions & Receipts',
+      label: t('nav.history'),
       icon: Receipt,
       badge: stats?.recentPayments?.length || null,
     },
     {
       id: 'schedules',
-      label: 'Dues Schedules & Levies',
+      label: t('nav.schedules'),
       icon: CalendarClock,
       badge: stats?.totalSchedulesCount || null,
     },
     {
       id: 'members',
-      label: 'Member Directory & Codes',
+      label: t('nav.members'),
       icon: Users,
       badge: stats?.totalMembersCount || null,
     },
     {
       id: 'announcements',
-      label: 'Notice Board',
+      label: t('nav.announcements'),
       icon: Megaphone,
       badge: stats?.recentAnnouncements?.length || null,
     },
     {
       id: 'profile',
-      label: 'My Profile',
+      label: t('nav.profile'),
       icon: User,
       badge: null,
     },
   ] : [
     {
       id: 'dashboard',
-      label: 'My Dashboard',
+      label: t('nav.dashboard'),
       icon: LayoutDashboard,
       badge: null,
     },
     {
       id: 'chat',
-      label: 'Member Chat & Support',
+      label: t('nav.chat'),
       icon: Megaphone,
       badge: 'Live',
       badgeClass: 'badge-emerald',
     },
     {
       id: 'pay-dues',
-      label: 'Pay My Dues',
+      label: t('nav.pay_dues'),
       icon: CreditCard,
       badge: 'Online',
       badgeClass: 'badge-emerald',
     },
     {
       id: 'history',
-      label: 'My Receipts',
+      label: t('nav.history'),
       icon: Receipt,
       badge: null,
     },
     {
       id: 'announcements',
-      label: 'Announcements',
+      label: t('nav.announcements'),
       icon: Megaphone,
       badge: stats?.recentAnnouncements?.length || null,
     },
     {
       id: 'profile',
-      label: 'My Profile & Address',
+      label: t('nav.profile'),
       icon: User,
       badge: null,
     },

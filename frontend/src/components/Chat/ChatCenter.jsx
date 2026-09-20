@@ -20,8 +20,14 @@ import {
   PhoneCall,
   Clock,
   Check,
-  X
+  X,
+  CornerUpLeft,
+  Edit3,
+  Ban
 } from 'lucide-react';
+import api from '../../services/api';
+import { useTranslation } from '../../i18n/LanguageContext';
+
 // Helper for distinct WhatsApp sender name colors in group chats
 const SENDER_COLORS = [
   '#059669', // Emerald green
@@ -44,12 +50,18 @@ const getSenderColor = (str) => {
 };
 
 export default function ChatCenter({ currentUser, userRole, onShowToast }) {
+  const { t } = useTranslation();
   const [activeChannel, setActiveChannel] = useState('GENERAL'); // 'GENERAL' | 'SUPPORT' | 'WELFARE'
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // WhatsApp Reply, Edit & Delete Modal States
+  const [replyingTo, setReplyingTo] = useState(null); // { id, senderName, content, messageType, senderRole, senderColor }
+  const [editingMessage, setEditingMessage] = useState(null); // { id, content }
+  const [deleteTargetMsg, setDeleteTargetMsg] = useState(null); // { id, isOwn }
 
   // Audio Recording State
   const [isRecording, setIsRecording] = useState(false);
@@ -69,6 +81,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
   const timerRef = useRef(null);
   const audioElementRef = useRef(null);
   const fileInputRef = useRef(null);
+  const textInputRef = useRef(null);
 
   // Preset Quick-Tap Phrases for Non-Typing / Low-Literacy Members
   const quickPhrasesByChannel = {
@@ -136,8 +149,71 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
     }
   })();
 
-  // Send Standard Text / Quick Phrase Message
+  // Trigger Reply to a message (WhatsApp Style)
+  const handleStartReply = (msg) => {
+    setEditingMessage(null);
+    setReplyingTo({
+      id: msg.id,
+      senderName: msg.senderName || 'Member',
+      content: msg.content,
+      messageType: msg.messageType,
+      senderRole: msg.senderRole,
+      senderColor: getSenderColor(msg.senderName || msg.senderEmail || String(msg.senderId))
+    });
+    setTimeout(() => textInputRef.current?.focus(), 60);
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+  };
+
+  // Trigger Edit of a message (WhatsApp Style)
+  const handleStartEdit = (msg) => {
+    setReplyingTo(null);
+    setEditingMessage({
+      id: msg.id,
+      content: msg.content
+    });
+    setInputText(msg.content || '');
+    setTimeout(() => textInputRef.current?.focus(), 60);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setInputText('');
+  };
+
+  // Send or Edit Message Handler
   const handleSendMessage = async (customContent = null, messageType = 'TEXT', customAttachment = null) => {
+    // If in Edit Mode:
+    if (editingMessage) {
+      const textToUpdate = customContent !== null ? customContent : inputText;
+      if (!textToUpdate.trim()) return;
+
+      setIsSending(true);
+      try {
+        await api.editChatMessage(editingMessage.id, {
+          content: textToUpdate.trim(),
+          senderId: activeUser?.id ? Number(activeUser.id) : null,
+          senderEmail: activeUser?.email || '',
+          userRole: activeUser?.role || userRole
+        });
+
+        setEditingMessage(null);
+        setInputText('');
+        await loadMessages(false);
+        if (onShowToast) {
+          onShowToast('Message Edited', 'Your message has been updated.', 'info');
+        }
+      } catch (err) {
+        if (onShowToast) onShowToast('Error', err.message || 'Could not edit message', 'error');
+      } finally {
+        setIsSending(false);
+      }
+      return;
+    }
+
+    // Normal Send / Reply Mode
     const textToSend = customContent !== null ? customContent : inputText;
     const attachmentToSend = customAttachment !== null ? customAttachment : (audioBase64 || imagePreview);
 
@@ -154,10 +230,15 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
         channel: activeChannel,
         content: textToSend.trim(),
         messageType: messageType,
-        attachmentData: attachmentToSend
+        attachmentData: attachmentToSend,
+        replyToId: replyingTo ? replyingTo.id : null,
+        replyToSenderName: replyingTo ? replyingTo.senderName : null,
+        replyToContent: replyingTo ? (replyingTo.content || (replyingTo.messageType === 'VOICE' ? '🎙️ Voice Note' : replyingTo.messageType === 'IMAGE' ? '📸 Photo' : 'Message')) : null,
+        replyToMessageType: replyingTo ? replyingTo.messageType : null
       });
 
       setInputText('');
+      setReplyingTo(null);
       setAudioBlob(null);
       setAudioBase64(null);
       setSelectedImage(null);
@@ -278,18 +359,33 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
     });
   };
 
-  // Delete Message (Admin/Treasurer Moderation)
-  const handleDeleteMessage = async (msgId) => {
-    if (window.confirm('Are you sure you want to delete this message from the channel?')) {
-      try {
-        await api.deleteChatMessage(msgId);
-        await loadMessages(false);
-        if (onShowToast) {
-          onShowToast('Message Removed', 'Message was deleted from the community channel.', 'info');
-        }
-      } catch (err) {
-        if (onShowToast) onShowToast('Error', err.message || 'Could not delete message', 'error');
+  // WhatsApp Single Message Delete Confirmation Handler
+  const handleOpenDeleteModal = (msg, isOwn) => {
+    setDeleteTargetMsg({
+      id: msg.id,
+      isOwn: isOwn
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetMsg) return;
+
+    try {
+      await api.deleteChatMessage(
+        deleteTargetMsg.id,
+        activeUser?.id ? Number(activeUser.id) : null,
+        activeUser?.email || '',
+        activeUser?.role || userRole || ''
+      );
+
+      setDeleteTargetMsg(null);
+      await loadMessages(false);
+      if (onShowToast) {
+        onShowToast('Message Deleted', 'The message was deleted from the room.', 'info');
       }
+    } catch (err) {
+      if (onShowToast) onShowToast('Error', err.message || 'Could not delete message', 'error');
+      setDeleteTargetMsg(null);
     }
   };
 
@@ -313,10 +409,8 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
               <MessageSquare size={22} />
             </div>
             <div>
-              <h1 className="chat-main-heading">Association Community Chat & Support</h1>
-              <p className="chat-sub-heading">
-                Friendly communication hub for all members. Send messages, voice notes, or tap quick 1-click phrases!
-              </p>
+              <h1 className="chat-main-heading">{t('chat.title')}</h1>
+              <p className="chat-sub-heading">{t('chat.subtitle')}</p>
             </div>
           </div>
 
@@ -326,7 +420,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
             title="Refresh messages"
           >
             <RefreshCw size={16} className={isRefreshing ? 'spin-animation' : ''} />
-            <span>Sync</span>
+            <span>{t('chat.sync')}</span>
           </button>
         </div>
 
@@ -337,7 +431,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
             onClick={() => setActiveChannel('GENERAL')}
           >
             <Users size={16} />
-            <span>📢 General Community Chat</span>
+            <span>📢 {t('chat.general_room')}</span>
           </button>
 
           <button 
@@ -345,7 +439,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
             onClick={() => setActiveChannel('SUPPORT')}
           >
             <HelpCircle size={16} />
-            <span>💳 Dues & Payments Help</span>
+            <span>💳 {t('chat.support_room')}</span>
           </button>
 
           <button 
@@ -353,7 +447,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
             onClick={() => setActiveChannel('WELFARE')}
           >
             <Sparkles size={16} />
-            <span>🤝 Welfare & Social Corner</span>
+            <span>🤝 {t('chat.welfare_room')}</span>
           </button>
         </div>
       </div>
@@ -364,13 +458,13 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
           <div className="channel-info-pill">
             <span className="live-dot"></span>
             <strong>
-              {activeChannel === 'GENERAL' && '📢 General Member Room'}
-              {activeChannel === 'SUPPORT' && '💳 Dues, Receipts & Payment Inquiries'}
-              {activeChannel === 'WELFARE' && '🤝 Welfare Support & Fellowship'}
+              {activeChannel === 'GENERAL' && t('chat.general_room_title')}
+              {activeChannel === 'SUPPORT' && t('chat.support_room_title')}
+              {activeChannel === 'WELFARE' && t('chat.welfare_room_title')}
             </strong>
           </div>
           <span className="channel-member-count">
-            {messages.length} messages logged
+            {messages.length} {t('chat.messages_logged')}
           </span>
         </div>
 
@@ -379,23 +473,24 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
           {isLoading ? (
             <div className="chat-loading-state">
               <RefreshCw size={28} className="spin-animation" />
-              <p>Loading channel conversation...</p>
+              <p>{t('common.loading')}</p>
             </div>
           ) : messages.length === 0 ? (
             <div className="chat-empty-state">
               <MessageSquare size={44} />
-              <h3>No Messages Yet in This Room</h3>
-              <p>Be the first to say hello or tap one of the quick phrase buttons below!</p>
+              <h3>{t('chat.no_messages')}</h3>
+              <p>{t('chat.no_messages_sub')}</p>
             </div>
           ) : (
             messages.map((msg) => {
               const isOwnMessage = currentUser && (msg.senderId === currentUser.id || (currentUser.email && msg.senderEmail === currentUser.email));
               const senderColor = getSenderColor(msg.senderName || msg.senderEmail || String(msg.senderId));
+              const isDeleted = Boolean(msg.isDeleted);
 
               return (
                 <div 
                   key={msg.id} 
-                  className={`chat-bubble-row ${isOwnMessage ? 'own-message' : 'other-message'}`}
+                  className={`chat-bubble-row ${isOwnMessage ? 'own-message' : 'other-message'} ${isDeleted ? 'is-deleted-row' : ''}`}
                 >
                   {/* Sender Avatar for other messages */}
                   {!isOwnMessage && (
@@ -409,12 +504,27 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
 
                   <div className="chat-bubble-wrapper">
                     {/* WhatsApp Style Message Bubble */}
-                    <div className={`chat-bubble-content ${msg.messageType === 'QUICK_PHRASE' ? 'quick-phrase-bubble' : ''}`}>
+                    <div className={`chat-bubble-content ${msg.messageType === 'QUICK_PHRASE' ? 'quick-phrase-bubble' : ''} ${isDeleted ? 'deleted-bubble' : ''}`}>
+                      
+                      {/* WhatsApp Quoted Reply Header (if this message is replying to another) */}
+                      {msg.replyToContent && !isDeleted && (
+                        <div 
+                          className="whatsapp-quoted-preview"
+                          style={{ borderLeftColor: getSenderColor(msg.replyToSenderName) }}
+                        >
+                          <div className="quote-sender-title" style={{ color: getSenderColor(msg.replyToSenderName) }}>
+                            <CornerUpLeft size={11} />
+                            <span>{msg.replyToSenderName || t('common.member')}</span>
+                          </div>
+                          <p className="quote-snippet-text">{msg.replyToContent}</p>
+                        </div>
+                      )}
+
                       {/* WhatsApp Group Sender Header (Only for incoming messages) */}
-                      {!isOwnMessage && (
+                      {!isOwnMessage && !isDeleted && (
                         <div className="whatsapp-sender-header">
                           <span className="whatsapp-sender-name" style={{ color: senderColor }}>
-                            {msg.senderName || 'Member'}
+                            {msg.senderName || t('common.member')}
                           </span>
                           
                           {msg.senderRole && (
@@ -431,66 +541,110 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                         </div>
                       )}
 
-                      {/* Text Content */}
-                      {msg.content && <p className="msg-text">{msg.content}</p>}
+                      {/* WhatsApp Deleted Message State */}
+                      {isDeleted ? (
+                        <div className="msg-deleted-box">
+                          <Ban size={14} className="deleted-icon" />
+                          <span className="deleted-text">
+                            {isOwnMessage ? t('chat.you_deleted') : t('chat.this_deleted')}
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Text Content */}
+                          {msg.content && <p className="msg-text">{msg.content}</p>}
 
-                      {/* Voice Note Player */}
-                      {msg.messageType === 'VOICE' && msg.attachmentData && (
-                        <div className="voice-note-player-box">
-                          <button 
-                            className="voice-play-btn"
-                            onClick={() => handlePlayAudio(msg.id, msg.attachmentData)}
-                            aria-label="Play Voice Note"
-                          >
-                            {playingAudioId === msg.id ? <Pause size={15} /> : <Play size={15} />}
-                          </button>
-                          <div className="voice-track-bar">
-                            <div className="voice-wave-bars">
-                              <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
-                              <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
-                              <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
-                              <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
-                              <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
+                          {/* Voice Note Player */}
+                          {msg.messageType === 'VOICE' && msg.attachmentData && (
+                            <div className="voice-note-player-box">
+                              <button 
+                                className="voice-play-btn"
+                                onClick={() => handlePlayAudio(msg.id, msg.attachmentData)}
+                                aria-label="Play Voice Note"
+                              >
+                                {playingAudioId === msg.id ? <Pause size={15} /> : <Play size={15} />}
+                              </button>
+                              <div className="voice-track-bar">
+                                <div className="voice-wave-bars">
+                                  <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
+                                  <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
+                                  <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
+                                  <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
+                                  <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
+                                </div>
+                                <span className="voice-label">
+                                  {playingAudioId === msg.id ? 'Playing Voice Note...' : 'Voice Note'}
+                                </span>
+                              </div>
+                              <Volume2 size={15} className="voice-icon" />
                             </div>
-                            <span className="voice-label">
-                              {playingAudioId === msg.id ? 'Playing Voice Note...' : 'Voice Note'}
-                            </span>
-                          </div>
-                          <Volume2 size={15} className="voice-icon" />
-                        </div>
+                          )}
+
+                          {/* Image Attachment Preview */}
+                          {msg.attachmentData && msg.messageType === 'IMAGE' && (
+                            <div className="attached-image-container">
+                              <img src={msg.attachmentData} alt="Shared Attachment" className="chat-attached-image" />
+                            </div>
+                          )}
+                        </>
                       )}
 
-                      {/* Image Attachment Preview */}
-                      {msg.attachmentData && msg.messageType === 'IMAGE' && (
-                        <div className="attached-image-container">
-                          <img src={msg.attachmentData} alt="Shared Attachment" className="chat-attached-image" />
-                        </div>
-                      )}
-
-                      {/* WhatsApp Bubble Bottom Metadata: Time + Checkmark + Delete Action */}
+                      {/* WhatsApp Bubble Bottom Metadata: Time + Edited + Checkmark */}
                       <div className="whatsapp-bubble-meta">
                         <span className="chat-timestamp">
                           {formatTime(msg.createdAt)}
                         </span>
+
+                        {/* WhatsApp "edited" indicator */}
+                        {msg.isEdited && !isDeleted && (
+                          <span className="whatsapp-edited-label">edited</span>
+                        )}
                         
-                        {isOwnMessage && (
+                        {isOwnMessage && !isDeleted && (
                           <span className="whatsapp-checks" title="Delivered">
                             ✓✓
                           </span>
                         )}
+                      </div>
 
-                        {/* Admin / Owner Delete Action */}
-                        {(userRole === 'ADMIN' || isOwnMessage) && (
+                      {/* WhatsApp Message Action Toolbar (Reply, Edit, Delete) */}
+                      {!isDeleted && (
+                        <div className="whatsapp-bubble-actions">
+                          {/* ↩️ Reply */}
                           <button 
                             type="button"
-                            className="msg-delete-btn"
-                            onClick={() => handleDeleteMessage(msg.id)}
-                            title="Delete message"
+                            className="action-icon-btn reply-btn"
+                            onClick={() => handleStartReply(msg)}
+                            title="Reply to message"
                           >
-                            <Trash2 size={11} />
+                            <CornerUpLeft size={13} />
                           </button>
-                        )}
-                      </div>
+
+                          {/* ✏️ Edit (Owner only on non-voice text) */}
+                          {isOwnMessage && msg.messageType !== 'VOICE' && !msg.attachmentData && (
+                            <button 
+                              type="button"
+                              className="action-icon-btn edit-btn"
+                              onClick={() => handleStartEdit(msg)}
+                              title="Edit message"
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                          )}
+
+                          {/* 🗑️ Delete (Only the member who posted it, or Admin/Treasurer for moderation) */}
+                          {(isOwnMessage || userRole === 'ADMIN' || userRole === 'TREASURER') && (
+                            <button 
+                              type="button"
+                              className="action-icon-btn delete-btn"
+                              onClick={() => handleOpenDeleteModal(msg, isOwnMessage)}
+                              title={isOwnMessage ? "Delete your message" : "Delete message as admin"}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -522,29 +676,71 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
           </div>
         </div>
 
+        {/* ================= 💬 WHATSAPP REPLY / EDIT BANNER ================= */}
+        {replyingTo && (
+          <div className="whatsapp-context-banner reply-context animate-slide-down">
+            <div className="context-indicator-bar" style={{ backgroundColor: replyingTo.senderColor || '#059669' }}></div>
+            <div className="context-content">
+              <div className="context-header">
+                <CornerUpLeft size={13} style={{ color: replyingTo.senderColor || '#059669' }} />
+                <span className="context-title" style={{ color: replyingTo.senderColor || '#059669' }}>
+                  {t('chat.replying_to')} {replyingTo.senderName}
+                </span>
+                {replyingTo.senderRole && (
+                  <span className="context-role">({replyingTo.senderRole})</span>
+                )}
+              </div>
+              <p className="context-snippet">
+                {replyingTo.messageType === 'VOICE' ? `🎙️ ${t('chat.voice_note')}` : replyingTo.messageType === 'IMAGE' ? '📸 Photo' : replyingTo.content}
+              </p>
+            </div>
+            <button type="button" className="context-cancel-btn" onClick={handleCancelReply} title="Cancel reply">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {editingMessage && (
+          <div className="whatsapp-context-banner edit-context animate-slide-down">
+            <div className="context-indicator-bar edit-accent"></div>
+            <div className="context-content">
+              <div className="context-header">
+                <Edit3 size={13} color="#0284c7" />
+                <span className="context-title edit-title">
+                  {t('chat.editing_message')}
+                </span>
+              </div>
+              <p className="context-snippet">{t('chat.editing_sub')}</p>
+            </div>
+            <button type="button" className="context-cancel-btn" onClick={handleCancelEdit} title="Cancel edit">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         {/* Input Bar & Actions */}
         <div className="chat-input-toolbar">
           {/* Active Audio Recording Indicator */}
           {isRecording ? (
             <div className="recording-active-bar animate-pulse">
               <div className="recording-wave-dot"></div>
-              <span className="recording-timer">Recording Voice Note ({recordingSeconds}s)...</span>
+              <span className="recording-timer">{t('chat.recording_voice')} ({recordingSeconds}s)...</span>
               <button className="recording-btn stop" onClick={stopRecording} title="Finish recording">
                 <Check size={16} />
-                <span>Done</span>
+                <span>{t('common.done')}</span>
               </button>
               <button className="recording-btn cancel" onClick={cancelRecording} title="Cancel recording">
                 <X size={16} />
-                <span>Cancel</span>
+                <span>{t('common.cancel')}</span>
               </button>
             </div>
           ) : audioBase64 ? (
             <div className="recorded-preview-bar">
               <Volume2 size={18} color="#10b981" />
-              <span className="preview-text">Voice note ready ({recordingSeconds}s)</span>
-              <button className="send-voice-btn" onClick={() => handleSendMessage("🎙️ Voice Note", "VOICE", audioBase64)}>
+              <span className="preview-text">{t('chat.voice_note')} ({recordingSeconds}s)</span>
+              <button className="send-voice-btn" onClick={() => handleSendMessage(`🎙️ ${t('chat.voice_note')}`, "VOICE", audioBase64)}>
                 <Send size={15} />
-                <span>Send Voice Note</span>
+                <span>{t('common.send')}</span>
               </button>
               <button className="cancel-voice-btn" onClick={() => { setAudioBase64(null); setAudioBlob(null); }}>
                 <X size={15} />
@@ -578,6 +774,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                 className="toolbar-action-btn"
                 onClick={() => fileInputRef.current?.click()}
                 title="Attach photo or payment slip"
+                disabled={Boolean(editingMessage)}
               >
                 <ImageIcon size={19} />
               </button>
@@ -588,15 +785,23 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                 className="toolbar-action-btn mic-btn"
                 onClick={startRecording}
                 title="Record voice note"
+                disabled={Boolean(editingMessage)}
               >
                 <Mic size={19} />
               </button>
 
               {/* Text Input */}
               <input 
+                ref={textInputRef}
                 type="text"
                 className="chat-text-input"
-                placeholder="Type your message here, or tap any quick phrase above..."
+                placeholder={
+                  editingMessage 
+                    ? `${t('chat.editing_message')}...` 
+                    : replyingTo 
+                    ? `${t('chat.replying_to')} ${replyingTo.senderName}...` 
+                    : t('chat.type_message')
+                }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isSending}
@@ -605,17 +810,59 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
               {/* Send Button */}
               <button 
                 type="submit" 
-                className="chat-send-btn"
+                className={`chat-send-btn ${editingMessage ? 'edit-mode-btn' : ''}`}
                 disabled={isSending || (!inputText.trim() && !imagePreview)}
+                title={editingMessage ? t('common.save') : t('common.send')}
               >
-                <Send size={17} />
-                <span className="send-label">Send</span>
+                {editingMessage ? <Check size={18} /> : <Send size={17} />}
+                <span className="send-label">{editingMessage ? t('common.save') : t('common.send')}</span>
               </button>
             </form>
           )}
         </div>
       </div>
+
+      {/* ================= 🗑️ WHATSAPP DELETE CONFIRMATION MODAL ================= */}
+      {deleteTargetMsg && (
+        <div className="whatsapp-modal-overlay animate-fade-in" onClick={() => setDeleteTargetMsg(null)}>
+          <div className="whatsapp-modal-card animate-scale-up" onClick={(e) => e.stopPropagation()}>
+            <div className="whatsapp-modal-header">
+              <div className="modal-icon-badge">
+                <Trash2 size={20} color="#dc2626" />
+              </div>
+              <div>
+                <h3 className="modal-title">{t('chat.delete_title')}</h3>
+                <p className="modal-subtitle">{t('chat.delete_subtitle')}</p>
+              </div>
+            </div>
+
+            <p className="whatsapp-modal-text">
+              {deleteTargetMsg.isOwn 
+                ? t('chat.delete_own_prompt')
+                : t('chat.delete_admin_prompt')}
+            </p>
+
+            <div className="whatsapp-modal-actions">
+              <button 
+                type="button" 
+                className="modal-btn delete-for-everyone-btn"
+                onClick={handleConfirmDelete}
+              >
+                <Trash2 size={16} />
+                <span>{t('chat.delete_for_everyone')}</span>
+              </button>
+              
+              <button 
+                type="button" 
+                className="modal-btn cancel-btn"
+                onClick={() => setDeleteTargetMsg(null)}
+              >
+                <span>{t('common.cancel')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

@@ -179,4 +179,44 @@ public class AuthServiceTests {
 
         assertTrue(ex.getMessage().contains("NO_ACCOUNT_FOUND"));
     }
+
+    @Test
+    void testForgotPasswordAndResetPasswordFlow() {
+        String email = "reset.member." + System.currentTimeMillis() + "@association.org";
+        String memberCode = "MEM-RST-" + (System.currentTimeMillis() % 10000);
+        Member member = new Member(
+                "Ama", "Darko", email, "+233 24 888 9900",
+                "Ridge", "Cape Coast", null, "Accountant",
+                LocalDate.now(), "ACTIVE", "MEMBER",
+                memberCode, PasswordUtil.hashPassword("oldPassword123"), true
+        );
+        memberRepository.save(member);
+
+        // 1. Request password reset using email
+        ForgotPasswordRequestDTO forgotReq = new ForgotPasswordRequestDTO(email);
+        java.util.Map<String, Object> forgotRes = authService.forgotPassword(forgotReq);
+        assertNotNull(forgotRes);
+        assertEquals(true, forgotRes.get("success"));
+        assertNotNull(forgotRes.get("resetCode"));
+        String resetCode = (String) forgotRes.get("resetCode");
+        assertEquals(6, resetCode.length());
+
+        // 2. Attempt reset with invalid code -> should fail
+        ResetPasswordRequestDTO badResetReq = new ResetPasswordRequestDTO(email, "000000", "newSecret456");
+        assertThrows(IllegalArgumentException.class, () -> {
+            authService.resetPassword(badResetReq);
+        });
+
+        // 3. Reset with valid code
+        ResetPasswordRequestDTO goodResetReq = new ResetPasswordRequestDTO(email, resetCode, "newSecret456");
+        AuthResponseDTO resetRes = authService.resetPassword(goodResetReq);
+        assertNotNull(resetRes);
+        assertEquals("Ama", resetRes.getFirstName());
+
+        // 4. Verify login succeeds with new password
+        LoginRequestDTO loginReq = new LoginRequestDTO(email, "newSecret456");
+        AuthResponseDTO loginRes = authService.login(loginReq);
+        assertNotNull(loginRes);
+        assertEquals("Ama", loginRes.getFirstName());
+    }
 }

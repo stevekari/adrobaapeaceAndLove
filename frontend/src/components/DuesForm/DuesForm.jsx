@@ -11,7 +11,15 @@ import {
   DollarSign,
   User,
   FileText,
-  Clock
+  Clock,
+  Copy,
+  Check,
+  Share2,
+  MessageCircle,
+  ArrowRight,
+  RotateCcw,
+  ShieldCheck,
+  Info
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import './DuesForm.css';
@@ -30,10 +38,12 @@ export default function DuesForm({
   const [amountPaid, setAmountPaid] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Mobile Money');
   const [notes, setNotes] = useState('');
-  const [status, setStatus] = useState('PAID');
+  const [status, setStatus] = useState(userRole === 'ADMIN' ? 'PAID' : 'PENDING');
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [submittedPayment, setSubmittedPayment] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Auto-sync currentMemberId
   useEffect(() => {
@@ -46,6 +56,11 @@ export default function DuesForm({
       }
     }
   }, [currentMemberId, userRole, members]);
+
+  // Sync default status on role change
+  useEffect(() => {
+    setStatus(userRole === 'ADMIN' ? 'PAID' : 'PENDING');
+  }, [userRole]);
 
   // When schedule changes, autofill the amount
   useEffect(() => {
@@ -75,7 +90,7 @@ export default function DuesForm({
   const selectedMember = members.find(m => m.id.toString() === memberId.toString());
 
   const paymentMethods = [
-    { id: 'Mobile Money', label: 'Mobile Money', icon: Smartphone, desc: 'MTN MoMo, Telecel Cash, AT' },
+    { id: 'Mobile Money', label: 'Mobile Money', icon: Smartphone, desc: 'MTN MoMo: 054 289 4012' },
     { id: 'Credit Card', label: 'Card Payment', icon: CreditCard, desc: 'Visa, Mastercard, Verve' },
     { id: 'Bank Transfer', label: 'Bank Transfer', icon: Landmark, desc: 'Direct wire / ACH / EFT' },
     { id: 'Cash', label: 'Cash at Office', icon: Banknote, desc: 'Handed to Secretariat' },
@@ -90,6 +105,33 @@ export default function DuesForm({
     return errors;
   };
 
+  const handleCopyCode = (code) => {
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 3000);
+  };
+
+  const handleShareWhatsApp = (payment) => {
+    if (!payment) return;
+    const payerName = payment.member ? `${payment.member.firstName} ${payment.member.lastName}` : (selectedMember ? `${selectedMember.firstName} ${selectedMember.lastName}` : 'Association Member');
+    const levyName = payment.schedule?.title || payment.duesPurpose || 'Dues Levy';
+    const code = payment.receiptNumber || 'REC-PENDING';
+    const amount = Number(payment.amountPaid || amountPaid).toFixed(2);
+    
+    const text = encodeURIComponent(
+      `🇬🇭 *PEACE & LOVE, ADROABAA - DUES PAYMENT SUBMISSION*\n\n` +
+      `👤 *Member:* ${payerName}\n` +
+      `📌 *Levy:* ${levyName}\n` +
+      `💵 *Amount:* $${amount}\n` +
+      `💳 *Payment Method:* ${payment.paymentMethod || paymentMethod}\n` +
+      `🏷️ *Payment Reference Code:* *${code}*\n` +
+      `⏳ *Status:* Pending Admin Confirmation\n\n` +
+      `Please confirm and verify in the Association Portal when received. Thank you!`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validate();
@@ -101,6 +143,8 @@ export default function DuesForm({
     try {
       const numScheduleId = (scheduleId && !isNaN(Number(scheduleId))) ? Number(scheduleId) : null;
       const purposeTitle = selectedSchedule?.title || 'Monthly Dues Levy';
+      const submissionStatus = userRole === 'ADMIN' ? status : 'PENDING';
+
       const payload = {
         memberId: Number(memberId),
         scheduleId: numScheduleId,
@@ -109,27 +153,23 @@ export default function DuesForm({
         paymentMethod,
         paymentDate: paymentDate ? `${paymentDate}T12:00:00` : new Date().toISOString(),
         notes: notes.trim(),
-        status
+        status: submissionStatus
       };
 
       const result = await onSubmitPayment(payload);
 
-      // Trigger Confetti Celebration Animation!
+      // Trigger Confetti Celebration Animation
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 90,
+        spread: 75,
         origin: { y: 0.6 },
         colors: ['#10b981', '#6366f1', '#f59e0b', '#3b82f6']
       });
 
-      // Reset form
+      setSubmittedPayment(result || { ...payload, receiptNumber: `REC-${Date.now().toString().slice(-6)}` });
       setNotes('');
       if (userRole === 'ADMIN') {
         setMemberId('');
-      }
-
-      if (onSuccessReceipt && result) {
-        onSuccessReceipt(result);
       }
     } catch (err) {
       console.error(err);
@@ -460,8 +500,152 @@ export default function DuesForm({
             <Sparkles size={16} />
             <span>Every logged transaction automatically produces a tamper-proof receipt with unique tracking ID.</span>
           </div>
+
+          {/* Association MoMo Payment Information */}
+          <div className="momo-guide-card">
+            <div className="momo-guide-head">
+              <Smartphone size={16} />
+              <span>Official Association MoMo Details</span>
+            </div>
+            <div className="momo-guide-body">
+              <div className="momo-row">
+                <span className="momo-lbl">MTN MoMo Number:</span>
+                <span className="momo-val bold">054 289 4012</span>
+              </div>
+              <div className="momo-row">
+                <span className="momo-lbl">Account Name:</span>
+                <span className="momo-val">Peace & Love, Adroabaa</span>
+              </div>
+              <div className="momo-row">
+                <span className="momo-lbl">Reference / Code:</span>
+                <span className="momo-val italic">Use generated Payment Code</span>
+              </div>
+              <p className="momo-hint">
+                <Info size={13} /> After sending, share the payment reference code with the Admin. Once confirmed (Yes), your verified receipt will appear live on your dashboard.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Interactive Payment Submission Voucher Dialog */}
+      {submittedPayment && (
+        <div className="payment-voucher-modal-backdrop animate-fade-in" onClick={() => setSubmittedPayment(null)}>
+          <div className="payment-voucher-modal animate-scale-up" onClick={(e) => e.stopPropagation()}>
+            <div className="voucher-modal-header">
+              <div className="voucher-success-icon-box">
+                {submittedPayment.status === 'PAID' ? <CheckCircle2 size={32} /> : <Clock size={32} />}
+              </div>
+              <h3 className="voucher-modal-title">
+                {submittedPayment.status === 'PAID' ? 'Payment Confirmed & Verified!' : 'Payment Submitted Successfully!'}
+              </h3>
+              <p className="voucher-modal-subtitle">
+                {submittedPayment.status === 'PAID'
+                  ? 'Official dues payment clearance has been recorded in the Association Ledger.'
+                  : 'Your payment voucher has been generated. Please copy the reference code below to confirm with the Admin.'}
+              </p>
+            </div>
+
+            {/* Payment Reference Code Box */}
+            <div className="voucher-code-highlight-box">
+              <div className="code-label-top">
+                <span>PAYMENT REFERENCE CODE</span>
+                <span className={`voucher-status-pill pill-${submittedPayment.status?.toLowerCase() || 'pending'}`}>
+                  {submittedPayment.status === 'PAID' ? '✓ CONFIRMED (PAID)' : '⏳ PENDING CONFIRMATION'}
+                </span>
+              </div>
+
+              <div className="code-display-row">
+                <span className="voucher-code-text">{submittedPayment.receiptNumber}</span>
+                <button 
+                  type="button" 
+                  className={`copy-code-btn ${copiedCode ? 'copied' : ''}`}
+                  onClick={() => handleCopyCode(submittedPayment.receiptNumber)}
+                >
+                  {copiedCode ? <Check size={16} /> : <Copy size={16} />}
+                  <span>{copiedCode ? 'Copied!' : 'Copy Code'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Transaction Summary Card */}
+            <div className="voucher-meta-card">
+              <div className="v-row">
+                <span className="v-lbl">Member / Payer:</span>
+                <span className="v-val font-semibold">
+                  {submittedPayment.member 
+                    ? `${submittedPayment.member.firstName} ${submittedPayment.member.lastName}` 
+                    : (selectedMember ? `${selectedMember.firstName} ${selectedMember.lastName}` : 'Association Member')}
+                </span>
+              </div>
+              <div className="v-row">
+                <span className="v-lbl">Dues Levy Purpose:</span>
+                <span className="v-val">{submittedPayment.duesPurpose || submittedPayment.schedule?.title || 'Association Dues'}</span>
+              </div>
+              <div className="v-row">
+                <span className="v-lbl">Amount Payable:</span>
+                <span className="v-val amount-val">${Number(submittedPayment.amountPaid || amountPaid).toFixed(2)}</span>
+              </div>
+              <div className="v-row">
+                <span className="v-lbl">Payment Method:</span>
+                <span className="v-val">{submittedPayment.paymentMethod || paymentMethod}</span>
+              </div>
+            </div>
+
+            {/* MoMo / WhatsApp Instructions if PENDING */}
+            {submittedPayment.status !== 'PAID' && (
+              <div className="voucher-instruction-box">
+                <h4 className="v-inst-title">
+                  <Smartphone size={15} />
+                  <span>How to Complete & Confirm Your Payment:</span>
+                </h4>
+                <ol className="v-inst-list">
+                  <li>Transfer <strong>${Number(submittedPayment.amountPaid || amountPaid).toFixed(2)}</strong> via MoMo to <strong>054 289 4012</strong> (Peace & Love, Adroabaa).</li>
+                  <li>Click below to <strong>Share via WhatsApp</strong> or send code <strong>{submittedPayment.receiptNumber}</strong> directly to the Admin.</li>
+                  <li>Once the Admin confirms (Yes), your receipt will instantly be verified and updated on your dashboard!</li>
+                </ol>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="voucher-modal-actions">
+              <button 
+                type="button" 
+                className="voucher-btn btn-whatsapp"
+                onClick={() => handleShareWhatsApp(submittedPayment)}
+              >
+                <MessageCircle size={17} />
+                <span>Share Code to Admin (WhatsApp)</span>
+              </button>
+
+              <div className="voucher-btn-row-2">
+                <button
+                  type="button"
+                  className="voucher-btn btn-view-receipt"
+                  onClick={() => {
+                    const pay = submittedPayment;
+                    setSubmittedPayment(null);
+                    if (onSuccessReceipt) {
+                      onSuccessReceipt(pay);
+                    }
+                  }}
+                >
+                  <FileText size={16} />
+                  <span>View Official Receipt</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="voucher-btn btn-dismiss"
+                  onClick={() => setSubmittedPayment(null)}
+                >
+                  <span>Done / Close</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

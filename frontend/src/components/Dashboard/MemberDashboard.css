@@ -535,6 +535,228 @@
   overflow: hidden;
 }
 
+/* Pending Payments Verification Banner */
+.pending-payments-banner {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
+}
+
+.pending-banner-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pending-alert-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pending-banner-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #92400e;
+  letter-spacing: -0.01em;
+}
+
+.pending-banner-desc {
+  font-size: 0.8rem;
+  color: #78350f;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.pending-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pending-payment-chip {
+  background: #ffffff;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.p-chip-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.p-chip-levy {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--slate-800);
+}
+
+.p-chip-amount {
+  font-weight: 800;
+  color: #059669;
+  font-size: 0.9rem;
+}
+
+.p-chip-code-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #0f172a;
+  color: #38bdf8;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.p-code-lbl {
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+.p-chip-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  color: var(--slate-700);
+  border: 1px solid #cbd5e1;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-copy-btn:hover {
+  background: #e2e8f0;
+}
+
+.chip-copy-btn.copied {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.chip-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #25d366;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-whatsapp-btn:hover {
+  background: #20ba5a;
+}
+
+.chip-view-btn {
+  padding: 5px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-700);
+  cursor: pointer;
+}
+
+.member-schedule-row.is-awaiting {
+  border-left: 4px solid #f59e0b;
+  background: #fffdf5;
+}
+
+.awaiting-confirmation-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.awaiting-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.mini-code-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #0f172a;
+  color: #38bdf8;
+  border: none;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.receipt-head-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.receipt-status-mini-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.receipt-status-mini-tag.tag-paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.receipt-status-mini-tag.tag-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .empty-message {
   padding: 16px;
   text-align: center;

@@ -5,14 +5,16 @@ import {
   Receipt, 
   CalendarClock, 
   Users, 
-  Megaphone,
-  Sparkles,
-  ChevronRight,
-  LogOut,
-  User,
-  KeyRound,
-  Hash,
-  Smartphone
+  Megaphone, 
+  Sparkles, 
+  ChevronRight, 
+  LogOut, 
+  User, 
+  KeyRound, 
+  Hash, 
+  Smartphone,
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -21,9 +23,9 @@ export default function Sidebar({
   setCurrentTab, 
   sidebarOpen, 
   setSidebarOpen, 
-  userRole,
-  currentUser,
-  onLogout,
+  userRole, 
+  currentUser, 
+  onLogout, 
   stats 
 }) {
   const isAdmin = userRole === 'ADMIN' || userRole === 'TREASURER';
@@ -134,6 +136,13 @@ export default function Sidebar({
     }
   };
 
+  const getInitials = () => {
+    if (!currentUser) return 'U';
+    const f = currentUser.firstName ? currentUser.firstName[0] : '';
+    const l = currentUser.lastName ? currentUser.lastName[0] : '';
+    return `${f}${l}`.toUpperCase() || 'U';
+  };
+
   return (
     <>
       {sidebarOpen && (
@@ -141,8 +150,45 @@ export default function Sidebar({
       )}
 
       <aside className={`portal-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        {/* Mobile Header Box */}
+        <div className="sidebar-mobile-user-header">
+          <div className="mobile-user-profile-row">
+            {currentUser?.profilePhoto ? (
+              <img src={currentUser.profilePhoto} alt="Avatar" className="mobile-drawer-avatar-img" />
+            ) : (
+              <div className={`mobile-drawer-avatar ${currentUser?.role?.toLowerCase() || 'member'}`}>
+                {getInitials()}
+              </div>
+            )}
+            <div className="mobile-drawer-info">
+              <span className="mobile-drawer-name">
+                {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Peace & Love'}
+              </span>
+              <div className="mobile-drawer-meta">
+                <span className={`mobile-drawer-role role-${currentUser?.role?.toLowerCase() || 'member'}`}>
+                  {currentUser?.role || 'MEMBER'}
+                </span>
+                {currentUser?.memberCode && (
+                  <span className="mobile-drawer-code">
+                    <Hash size={11} />
+                    {currentUser.memberCode}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            className="sidebar-close-btn" 
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close Menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
         <div className="sidebar-section-title">
-          {isAdmin ? 'Administration Suite' : 'Member Self-Service'}
+          {isAdmin ? 'Administration Suite' : 'Member Menu & Features'}
         </div>
 
         <nav className="sidebar-nav">
@@ -191,13 +237,6 @@ export default function Sidebar({
               />
             </div>
           </div>
-          <div className="footer-card-hint">
-            {isAdmin ? (
-              <span>🛡️ Admin Mode Active</span>
-            ) : (
-              <span>👤 Member: {currentUser?.memberCode || 'Active'}</span>
-            )}
-          </div>
 
           <button 
             type="button" 
@@ -208,13 +247,21 @@ export default function Sidebar({
             }}
             title="Add to Home Screen"
           >
-            <Smartphone size={15} />
+            <Smartphone size={16} />
             <span>Install App on Phone</span>
           </button>
 
-          <button className="sidebar-logout-btn" onClick={onLogout} title="Log out">
-            <LogOut size={15} />
-            <span>Log Out</span>
+          <button 
+            type="button"
+            className="sidebar-logout-btn" 
+            onClick={() => {
+              if (window.innerWidth <= 900) setSidebarOpen(false);
+              onLogout();
+            }} 
+            title="Sign out of Peace & Love"
+          >
+            <LogOut size={16} />
+            <span>Log Out of Account</span>
           </button>
         </div>
       </aside>

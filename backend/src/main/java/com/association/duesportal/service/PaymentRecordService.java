@@ -120,15 +120,26 @@ public class PaymentRecordService {
 
         PaymentRecord saved = paymentRecordRepository.save(record);
 
-        // Generate Real Notification for the Member and Admin Ledger
-        Notification notification = new Notification(
-                null, // broadcast to all
-                "💳 Dues Payment Verified: " + receiptNumber,
-                member.getFullName() + " paid $" + request.getAmountPaid() + " for " + schedule.getTitle() + " (" + request.getPaymentMethod() + ")",
-                "PAYMENT",
-                "history"
-        );
-        notificationRepository.save(notification);
+        // Generate Real Notification
+        if ("PENDING".equalsIgnoreCase(saved.getStatus())) {
+            Notification notification = new Notification(
+                    null,
+                    "⏳ New Dues Payment Awaiting Admin Confirmation: " + receiptNumber,
+                    member.getFullName() + " submitted GHS " + request.getAmountPaid() + " for " + schedule.getTitle() + " (" + request.getPaymentMethod() + "). Verification Code: " + receiptNumber,
+                    "PAYMENT",
+                    "history"
+            );
+            notificationRepository.save(notification);
+        } else {
+            Notification notification = new Notification(
+                    null,
+                    "💳 Dues Payment Verified: " + receiptNumber,
+                    member.getFullName() + " paid GHS " + request.getAmountPaid() + " for " + schedule.getTitle() + " (" + request.getPaymentMethod() + ")",
+                    "PAYMENT",
+                    "history"
+            );
+            notificationRepository.save(notification);
+        }
 
         return saved;
     }
@@ -137,7 +148,20 @@ public class PaymentRecordService {
         PaymentRecord record = paymentRecordRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Payment record not found with id: " + id));
         record.setStatus(status);
-        return paymentRecordRepository.save(record);
+        PaymentRecord saved = paymentRecordRepository.save(record);
+
+        if ("PAID".equalsIgnoreCase(status)) {
+            Notification notification = new Notification(
+                    null,
+                    "✅ Dues Payment Confirmed & Approved: " + record.getReceiptNumber(),
+                    "Administrator confirmed payment of GHS " + record.getAmountPaid() + " from " + record.getMember().getFullName() + " for " + record.getSchedule().getTitle() + ". Verified Receipt generated!",
+                    "PAYMENT",
+                    "history"
+            );
+            notificationRepository.save(notification);
+        }
+
+        return saved;
     }
 
     public void deletePayment(Long id) {

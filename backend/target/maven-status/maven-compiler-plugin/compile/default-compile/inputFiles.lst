@@ -16,6 +16,7 @@
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/ChatMessageDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/ChatMessageRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/DashboardStatsDTO.java
+/Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/ForgotPasswordRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/GenerateCodeRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/GoogleLoginRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/LoginRequestDTO.java
@@ -26,6 +27,7 @@
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/PaymentRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/RedeemCodeRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/RegistrationCodeDTO.java
+/Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/ResetPasswordRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/ScheduleProgressDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/model/Announcement.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/model/ChatMessage.java

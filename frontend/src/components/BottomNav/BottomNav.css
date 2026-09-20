@@ -205,6 +205,28 @@
   border: 1.5px solid transparent;
 }
 
+.fb-menu-avatar-wrapper {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.fb-menu-mini-badge {
+  position: absolute;
+  bottom: -3px;
+  right: -5px;
+  background: #0284c7;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
 .fb-avatar-initials.active-border {
   border-color: #0284c7;
   box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3);

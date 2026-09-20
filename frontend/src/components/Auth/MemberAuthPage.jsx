@@ -92,6 +92,95 @@ export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showTo
   const [registeringMember, setRegisteringMember] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState(false);
 
+  // Forgot Password State
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+  const [forgotResetCode, setForgotResetCode] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
+  const [showForgotNewPassword, setShowForgotNewPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1: Enter email -> 2: Enter code & new pass
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
+  const [receivedOtpCode, setReceivedOtpCode] = useState('');
+  const [copiedOtp, setCopiedOtp] = useState(false);
+
+  // Request Password Reset Code via Email
+  const handleRequestResetCode = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+    if (!forgotIdentifier.trim()) {
+      setForgotError('Please enter your registered email address or member code.');
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await api.forgotPassword({ email: forgotIdentifier.trim() });
+      setMaskedEmail(res.maskedEmail || forgotIdentifier);
+      setReceivedOtpCode(res.resetCode || '');
+      setForgotSuccess(res.message || 'A 6-digit password reset code has been sent to your email.');
+      setForgotStep(2);
+      showToast('Code Sent', `Password reset code sent to ${res.maskedEmail || forgotIdentifier}`, 'info');
+    } catch (err) {
+      setForgotError(err.message || 'Could not send reset code. Please check your email or member code.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  // Submit Password Reset with Code
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    if (!forgotResetCode.trim() || forgotResetCode.trim().length !== 6) {
+      setForgotError('Please enter the 6-digit reset code sent to your email.');
+      return;
+    }
+    if (!forgotNewPassword || forgotNewPassword.length < 6) {
+      setForgotError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setForgotError('Passwords do not match. Please re-enter.');
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const authData = await api.resetPassword({
+        email: forgotIdentifier.trim(),
+        resetCode: forgotResetCode.trim(),
+        newPassword: forgotNewPassword
+      });
+
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#6366f1', '#f59e0b']
+      });
+
+      showToast('Password Reset Successfully!', `Welcome back, ${authData.firstName}!`, 'success');
+      onLoginSuccess(authData);
+    } catch (err) {
+      setForgotError(err.message || 'Failed to reset password. Please check your code.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleCopyOtp = (code) => {
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedOtp(true);
+    setTimeout(() => setCopiedOtp(false), 2500);
+  };
+
   // 1. Handle Member Login
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -291,7 +380,22 @@ export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showTo
                 </div>
 
                 <div className="auth-input-group">
-                  <label>Password</label>
+                  <div className="auth-label-row">
+                    <label>Password</label>
+                    <button 
+                      type="button" 
+                      className="auth-link-btn-subtle"
+                      onClick={() => {
+                        setForgotIdentifier(loginIdentifier || '');
+                        setActiveTab('forgot-password');
+                        setForgotStep(1);
+                        setForgotError('');
+                        setForgotSuccess('');
+                      }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <div className="auth-input-wrapper">
                     <Lock size={18} className="input-icon" />
                     <input 
@@ -340,6 +444,194 @@ export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showTo
                   </button>
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* ================= 1B. FORGOT & RESET PASSWORD TAB ================= */}
+          {activeTab === 'forgot-password' && (
+            <div className="auth-tab-pane animate-fade-in">
+              <div className="auth-card-title-box">
+                <div className="code-flow-badge">
+                  <KeyRound size={14} />
+                  <span>Account Security</span>
+                </div>
+                <h2>Reset Your Password</h2>
+                <p>
+                  {forgotStep === 1 
+                    ? 'Enter your registered Email Address or Member Code to receive a 6-digit OTP reset code.' 
+                    : `Enter the 6-digit reset code sent to ${maskedEmail || 'your email'} and create your new password.`}
+                </p>
+              </div>
+
+              {forgotError && (
+                <div className="auth-alert alert-danger animate-shake">
+                  <AlertCircle size={17} />
+                  <span>{forgotError}</span>
+                </div>
+              )}
+
+              {forgotSuccess && (
+                <div className="auth-alert alert-info animate-fade-in">
+                  <CheckCircle2 size={17} />
+                  <span>{forgotSuccess}</span>
+                </div>
+              )}
+
+              {/* Step 1: Request OTP Code */}
+              {forgotStep === 1 && (
+                <form onSubmit={handleRequestResetCode} className="auth-form">
+                  <div className="auth-input-group">
+                    <label>Registered Email or Member Code <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Mail size={18} className="input-icon" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. member@email.com or MEM-1004"
+                        value={forgotIdentifier}
+                        onChange={(e) => setForgotIdentifier(e.target.value)}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <span className="input-hint">We will dispatch a secure 6-digit OTP code to your registered email address.</span>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="auth-submit-btn member-submit-btn"
+                    disabled={forgotLoading}
+                  >
+                    {forgotLoading ? (
+                      <span className="btn-spinner-text">Sending Reset Code...</span>
+                    ) : (
+                      <>
+                        <span>Send 6-Digit Reset Code</span>
+                        <ArrowRight size={17} />
+                      </>
+                    )}
+                  </button>
+
+                  <div className="auth-footer-links">
+                    <button 
+                      type="button" 
+                      className="auth-link-text"
+                      onClick={() => { setActiveTab('login'); setForgotError(''); }}
+                    >
+                      ← Back to Member Sign In
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Step 2: Enter OTP Code & Set New Password */}
+              {forgotStep === 2 && (
+                <form onSubmit={handleResetPasswordSubmit} className="auth-form">
+                  {receivedOtpCode && (
+                    <div className="otp-badge-box">
+                      <div className="otp-badge-header">
+                        <Sparkles size={15} color="#10b981" />
+                        <span>Password Reset Code Generated:</span>
+                      </div>
+                      <div className="otp-badge-content">
+                        <span className="otp-digit-display">{receivedOtpCode}</span>
+                        <button 
+                          type="button" 
+                          className="otp-copy-btn"
+                          onClick={() => handleCopyOtp(receivedOtpCode)}
+                        >
+                          {copiedOtp ? '✓ Copied' : 'Copy Code'}
+                        </button>
+                      </div>
+                      <p className="otp-badge-hint">A simulated dispatch was also logged. Enter the 6-digit code below.</p>
+                    </div>
+                  )}
+
+                  <div className="auth-input-group">
+                    <label>6-Digit Verification Code <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <KeyRound size={18} className="input-icon" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. 849201"
+                        maxLength={6}
+                        value={forgotResetCode}
+                        onChange={(e) => setForgotResetCode(e.target.value.replace(/\D/g, ''))}
+                        className="otp-code-input"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className="auth-input-group">
+                    <label>New Password <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Lock size={18} className="input-icon" />
+                      <input 
+                        type={showForgotNewPassword ? 'text' : 'password'}
+                        placeholder="At least 6 characters"
+                        value={forgotNewPassword}
+                        onChange={(e) => setForgotNewPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                      <button 
+                        type="button" 
+                        className="password-toggle-btn"
+                        onClick={() => setShowForgotNewPassword(!showForgotNewPassword)}
+                      >
+                        {showForgotNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="auth-input-group">
+                    <label>Confirm New Password <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Lock size={18} className="input-icon" />
+                      <input 
+                        type={showForgotNewPassword ? 'text' : 'password'}
+                        placeholder="Re-enter new password"
+                        value={forgotConfirmPassword}
+                        onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="auth-submit-btn success-btn"
+                    disabled={forgotLoading}
+                  >
+                    {forgotLoading ? (
+                      <span className="btn-spinner-text">Resetting Password...</span>
+                    ) : (
+                      <>
+                        <span>Update Password & Enter Portal</span>
+                        <CheckCircle2 size={17} />
+                      </>
+                    )}
+                  </button>
+
+                  <div className="auth-footer-links auth-dual-links">
+                    <button 
+                      type="button" 
+                      className="auth-link-text-subtle"
+                      onClick={() => setForgotStep(1)}
+                    >
+                      Resend Code / Change Identifier
+                    </button>
+                    <button 
+                      type="button" 
+                      className="auth-link-text"
+                      onClick={() => { setActiveTab('login'); setForgotError(''); }}
+                    >
+                      ← Back to Sign In
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           )}
 

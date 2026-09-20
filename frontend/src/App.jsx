@@ -313,7 +313,6 @@ export default function App() {
       <div className="portal-root-layout">
         <Toast toasts={toasts} onDismiss={dismissToast} />
         <AuthPage onLoginSuccess={handleLoginSuccess} showToast={showToast} />
-        <PWAInstallBanner />
       </div>
     );
   }
@@ -379,6 +378,7 @@ export default function App() {
                 onOpenAnnouncementModal={() => setAnnouncementModalOpen(true)}
                 onCleanSlate={handleCleanSlate}
                 onViewReceipt={(receipt) => setActiveReceipt(receipt)}
+                onUpdateStatus={handleUpdatePaymentStatus}
                 userRole={userRole}
                 currentUser={currentUser}
               />

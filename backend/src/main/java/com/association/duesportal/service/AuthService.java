@@ -176,6 +176,91 @@ public class AuthService {
         return new AuthResponseDTO(token, updated, "Registration complete! Password created successfully. Welcome to the portal, " + updated.getFirstName() + "!");
     }
 
+    public java.util.Map<String, Object> forgotPassword(ForgotPasswordRequestDTO request) {
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email address or Member Code is required.");
+        }
+
+        String identifier = request.getEmail().trim();
+        Member member = memberRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new IllegalArgumentException("No registered account found with email or member code: " + identifier));
+
+        if ("SUSPENDED".equalsIgnoreCase(member.getStatus())) {
+            throw new IllegalArgumentException("This account is currently suspended. Please contact the association secretariat.");
+        }
+
+        // Generate a secure 6-digit numeric reset OTP code
+        String resetCode = String.format("%06d", (int) (100000 + Math.random() * 900000));
+        member.setResetToken(resetCode);
+        member.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        memberRepository.save(member);
+
+        String email = member.getEmail();
+        String maskedEmail = maskEmail(email);
+
+        System.out.println("====================================================");
+        System.out.println("📧 [SIMULATED EMAIL DISPATCH] Password Reset Code");
+        System.out.println("To: " + email + " (" + member.getFullName() + ")");
+        System.out.println("Reset OTP Code: " + resetCode);
+        System.out.println("Valid For: 15 minutes");
+        System.out.println("====================================================");
+
+        return java.util.Map.of(
+                "success", true,
+                "message", "A 6-digit password reset code has been sent to " + maskedEmail + ". It expires in 15 minutes.",
+                "email", member.getEmail(),
+                "maskedEmail", maskedEmail,
+                "memberName", member.getFullName(),
+                "resetCode", resetCode
+        );
+    }
+
+    public AuthResponseDTO resetPassword(ResetPasswordRequestDTO request) {
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email address or Member Code is required.");
+        }
+        if (request.getResetCode() == null || request.getResetCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("Reset code is required.");
+        }
+        if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters long.");
+        }
+
+        String identifier = request.getEmail().trim();
+        Member member = memberRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new IllegalArgumentException("No account found for: " + identifier));
+
+        String inputCode = request.getResetCode().trim();
+        if (member.getResetToken() == null || !member.getResetToken().equalsIgnoreCase(inputCode)) {
+            throw new IllegalArgumentException("Invalid password reset code. Please check the code or request a new one.");
+        }
+
+        if (member.getResetTokenExpiry() == null || member.getResetTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("This password reset code has expired. Please request a new code.");
+        }
+
+        String hashedPassword = PasswordUtil.hashPassword(request.getNewPassword());
+        member.setPassword(hashedPassword);
+        member.setIsPasswordSet(true);
+        member.setResetToken(null);
+        member.setResetTokenExpiry(null);
+
+        Member saved = memberRepository.save(member);
+        String token = "sess-" + UUID.randomUUID().toString();
+        return new AuthResponseDTO(token, saved, "Password has been successfully reset! Welcome back, " + saved.getFirstName() + ".");
+    }
+
+    private String maskEmail(String email) {
+        if (email == null || !email.contains("@")) return email != null ? email : "";
+        String[] parts = email.split("@");
+        String name = parts[0];
+        String domain = parts[1];
+        if (name.length() <= 2) {
+            return name + "***@" + domain;
+        }
+        return name.substring(0, 2) + "***" + name.substring(name.length() - 1) + "@" + domain;
+    }
+
     public String generateUniqueCode(String prefix) {
         String code;
         int attempts = 0;

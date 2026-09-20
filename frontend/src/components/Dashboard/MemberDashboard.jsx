@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   CreditCard, 
   Receipt, 
@@ -13,7 +13,11 @@ import {
   Calendar,
   Building2,
   Phone,
-  MapPin
+  MapPin,
+  Copy,
+  Check,
+  MessageCircle,
+  ShieldAlert
 } from 'lucide-react';
 import './MemberDashboard.css';
 
@@ -26,19 +30,58 @@ export default function MemberDashboard({
   onOpenPayModal, 
   onViewReceipt 
 }) {
+  const [copiedCode, setCopiedCode] = useState(null);
+
   // Calculate Member's Personal Metrics
   const myPayments = recentPayments || [];
   const myTotalPaid = myPayments
     .filter((p) => p.status === 'PAID')
     .reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
+  const pendingPayments = myPayments.filter((p) => p.status === 'PENDING');
+
   const paidScheduleIds = new Set(
     myPayments.filter((p) => p.status === 'PAID').map((p) => p.schedule?.id)
   );
 
+  const pendingScheduleMap = new Map();
+  pendingPayments.forEach((p) => {
+    if (p.schedule?.id) {
+      pendingScheduleMap.set(p.schedule.id, p);
+    }
+  });
+
   const activeSchedules = schedules.filter((s) => s.active !== false);
   const fullyPaidCount = activeSchedules.filter((s) => paidScheduleIds.has(s.id)).length;
   const isUpToDate = activeSchedules.length > 0 && fullyPaidCount >= activeSchedules.length;
+
+  const handleCopyCode = (code, e) => {
+    if (e) e.stopPropagation();
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2500);
+  };
+
+  const handleShareWhatsApp = (pay, e) => {
+    if (e) e.stopPropagation();
+    const payerName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Association Member';
+    const levyName = pay.schedule?.title || pay.duesPurpose || 'Dues Levy';
+    const code = pay.receiptNumber;
+    const amount = Number(pay.amountPaid || 0).toFixed(2);
+    
+    const text = encodeURIComponent(
+      `🇬🇭 *PEACE & LOVE, ADROABAA - DUES PAYMENT CONFIRMATION*\n\n` +
+      `👤 *Member:* ${payerName}\n` +
+      `📌 *Levy:* ${levyName}\n` +
+      `💵 *Amount:* $${amount}\n` +
+      `💳 *Payment Method:* ${pay.paymentMethod || 'Mobile Money'}\n` +
+      `🏷️ *Payment Reference Code:* *${code}*\n` +
+      `⏳ *Status:* Pending Admin Confirmation\n\n` +
+      `Hello Admin, I have made the transfer. Please confirm when received. Thank you!`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
 
   const getInitials = () => {
     if (!currentUser) return 'U';
@@ -100,6 +143,68 @@ export default function MemberDashboard({
           </div>
         </div>
       </div>
+
+      {/* Pending Payment Verification Banner (If Any) */}
+      {pendingPayments.length > 0 && (
+        <div className="pending-payments-banner">
+          <div className="pending-banner-header">
+            <div className="pending-alert-icon">
+              <Clock size={20} />
+            </div>
+            <div className="pending-banner-title-group">
+              <h3 className="pending-banner-title">
+                {pendingPayments.length} Payment{pendingPayments.length > 1 ? 's' : ''} Awaiting Admin Confirmation
+              </h3>
+              <p className="pending-banner-desc">
+                Your payment submission has been received. Please send your payment reference code to the Admin (or via MoMo: 054 289 4012). Once confirmed (Yes), your verified receipt will unlock automatically.
+              </p>
+            </div>
+          </div>
+
+          <div className="pending-items-list">
+            {pendingPayments.map((p) => (
+              <div key={p.id} className="pending-payment-chip">
+                <div className="p-chip-info">
+                  <span className="p-chip-levy">{p.schedule?.title || p.duesPurpose || 'Dues Levy'}</span>
+                  <span className="p-chip-amount">${Number(p.amountPaid || 0).toFixed(2)}</span>
+                  <div className="p-chip-code-row">
+                    <span className="p-code-lbl">Code:</span>
+                    <span className="p-code-val">{p.receiptNumber}</span>
+                  </div>
+                </div>
+
+                <div className="p-chip-actions">
+                  <button 
+                    type="button" 
+                    className={`chip-copy-btn ${copiedCode === p.receiptNumber ? 'copied' : ''}`}
+                    onClick={(e) => handleCopyCode(p.receiptNumber, e)}
+                  >
+                    {copiedCode === p.receiptNumber ? <Check size={14} /> : <Copy size={14} />}
+                    <span>{copiedCode === p.receiptNumber ? 'Copied!' : 'Copy Code'}</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="chip-whatsapp-btn"
+                    onClick={(e) => handleShareWhatsApp(p, e)}
+                  >
+                    <MessageCircle size={14} />
+                    <span>Send to Admin</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="chip-view-btn"
+                    onClick={() => onViewReceipt(p)}
+                  >
+                    <span>Voucher</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Personal KPI Cards */}
       <div className="member-stats-row">
@@ -170,8 +275,10 @@ export default function MemberDashboard({
             ) : (
               activeSchedules.map((sch) => {
                 const isPaid = paidScheduleIds.has(sch.id);
+                const pendingPay = pendingScheduleMap.get(sch.id);
+
                 return (
-                  <div key={sch.id} className={`member-schedule-row ${isPaid ? 'is-paid' : 'is-pending'}`}>
+                  <div key={sch.id} className={`member-schedule-row ${isPaid ? 'is-paid' : pendingPay ? 'is-awaiting' : 'is-pending'}`}>
                     <div className="sch-details">
                       <div className="sch-top-row">
                         <span className="sch-title">{sch.title}</span>
@@ -192,6 +299,22 @@ export default function MemberDashboard({
                         <div className="paid-status-pill">
                           <CheckCircle2 size={14} />
                           <span>Paid ✓</span>
+                        </div>
+                      ) : pendingPay ? (
+                        <div className="awaiting-confirmation-box">
+                          <div className="awaiting-badge">
+                            <Clock size={13} />
+                            <span>Awaiting Admin "Yes"</span>
+                          </div>
+                          <button 
+                            type="button" 
+                            className="mini-code-action"
+                            onClick={(e) => handleCopyCode(pendingPay.receiptNumber, e)}
+                            title="Copy reference code"
+                          >
+                            <span>Code: {pendingPay.receiptNumber}</span>
+                            {copiedCode === pendingPay.receiptNumber ? <Check size={12} /> : <Copy size={12} />}
+                          </button>
                         </div>
                       ) : (
                         <button 
@@ -216,7 +339,7 @@ export default function MemberDashboard({
           <div className="member-section-card">
             <div className="section-header-row">
               <div>
-                <h2 className="section-title">My Recent Receipts</h2>
+                <h2 className="section-title">My Recent Receipts & Vouchers</h2>
                 <p className="section-sub">Official verified transactions</p>
               </div>
               <button className="section-link-btn" onClick={() => onNavigateTab('history')}>
@@ -229,13 +352,18 @@ export default function MemberDashboard({
               {myPayments.length === 0 ? (
                 <div className="empty-message">No receipts issued yet.</div>
               ) : (
-                myPayments.slice(0, 3).map((pay) => (
+                myPayments.slice(0, 4).map((pay) => (
                   <div key={pay.id} className="my-receipt-item">
                     <div className="receipt-left">
                       <Receipt size={16} className="receipt-icon" />
                       <div>
-                        <span className="receipt-num">{pay.receiptNumber}</span>
-                        <span className="receipt-sch">{pay.schedule?.title || 'Association Dues'}</span>
+                        <div className="receipt-head-row">
+                          <span className="receipt-num">{pay.receiptNumber}</span>
+                          <span className={`receipt-status-mini-tag ${pay.status === 'PAID' ? 'tag-paid' : 'tag-pending'}`}>
+                            {pay.status === 'PAID' ? 'PAID' : 'PENDING'}
+                          </span>
+                        </div>
+                        <span className="receipt-sch">{pay.schedule?.title || pay.duesPurpose || 'Association Dues'}</span>
                       </div>
                     </div>
                     <div className="receipt-right">
@@ -243,9 +371,9 @@ export default function MemberDashboard({
                       <button 
                         className="view-voucher-btn"
                         onClick={() => onViewReceipt(pay)}
-                        title="View printable receipt"
+                        title="View receipt voucher"
                       >
-                        Receipt
+                        {pay.status === 'PAID' ? 'Receipt' : 'Voucher'}
                       </button>
                     </div>
                   </div>

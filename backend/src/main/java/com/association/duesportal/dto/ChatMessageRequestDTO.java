@@ -1,11 +1,12 @@
 package com.association.duesportal.dto;
 
-import jakarta.validation.constraints.NotNull;
-
 public class ChatMessageRequestDTO {
 
-    @NotNull(message = "Sender ID is required")
     private Long senderId;
+
+    private String senderEmail;
+
+    private String memberCode;
 
     private String channel = "GENERAL"; // GENERAL, SUPPORT, WELFARE
 
@@ -26,12 +27,38 @@ public class ChatMessageRequestDTO {
         this.attachmentData = attachmentData;
     }
 
+    public ChatMessageRequestDTO(Long senderId, String senderEmail, String memberCode, String channel, String content, String messageType, String attachmentData) {
+        this.senderId = senderId;
+        this.senderEmail = senderEmail;
+        this.memberCode = memberCode;
+        this.channel = channel != null ? channel : "GENERAL";
+        this.content = content;
+        this.messageType = messageType != null ? messageType : "TEXT";
+        this.attachmentData = attachmentData;
+    }
+
     public Long getSenderId() {
         return senderId;
     }
 
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
+
+    public String getMemberCode() {
+        return memberCode;
+    }
+
+    public void setMemberCode(String memberCode) {
+        this.memberCode = memberCode;
     }
 
     public String getChannel() {

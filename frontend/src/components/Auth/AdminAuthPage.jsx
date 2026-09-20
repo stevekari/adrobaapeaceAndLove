@@ -42,6 +42,100 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState('');
 
+  // Forgot Password State
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+  const [forgotResetCode, setForgotResetCode] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
+  const [showForgotNewPassword, setShowForgotNewPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
+  const [receivedOtpCode, setReceivedOtpCode] = useState('');
+  const [copiedOtp, setCopiedOtp] = useState(false);
+
+  // Request Password Reset Code for Admin
+  const handleAdminRequestResetCode = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+    if (!forgotIdentifier.trim()) {
+      setForgotError('Please enter your administrator email address or admin code.');
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await api.forgotPassword({ email: forgotIdentifier.trim() });
+      setMaskedEmail(res.maskedEmail || forgotIdentifier);
+      setReceivedOtpCode(res.resetCode || '');
+      setForgotSuccess(res.message || 'A 6-digit password reset code has been sent to your email.');
+      setForgotStep(2);
+      showToast('Code Sent', `Password reset code sent to ${res.maskedEmail || forgotIdentifier}`, 'info');
+    } catch (err) {
+      setForgotError(err.message || 'Could not send reset code. Please check your admin credentials.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  // Submit Password Reset for Admin
+  const handleAdminResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    if (!forgotResetCode.trim() || forgotResetCode.trim().length !== 6) {
+      setForgotError('Please enter the 6-digit reset code sent to your email.');
+      return;
+    }
+    if (!forgotNewPassword || forgotNewPassword.length < 6) {
+      setForgotError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setForgotError('Passwords do not match. Please re-enter.');
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const authData = await api.resetPassword({
+        email: forgotIdentifier.trim(),
+        resetCode: forgotResetCode.trim(),
+        newPassword: forgotNewPassword
+      });
+
+      if (authData.role !== 'ADMIN' && authData.role !== 'TREASURER') {
+        setForgotError('Access denied: This portal is reserved for administrators.');
+        return;
+      }
+
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#6366f1', '#4f46e5', '#10b981']
+      });
+
+      showToast('Admin Password Reset Successfully!', `Welcome back, Administrator ${authData.firstName}!`, 'success');
+      onLoginSuccess(authData);
+    } catch (err) {
+      setForgotError(err.message || 'Failed to reset password. Please check your reset code.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleCopyOtp = (code) => {
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedOtp(true);
+    setTimeout(() => setCopiedOtp(false), 2500);
+  };
+
   // Handle Admin Google Sign-In
   const handleAdminGoogleAuth = async () => {
     setLoginError('');
@@ -273,7 +367,22 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
                 </div>
 
                 <div className="auth-input-group">
-                  <label>Administrator Password</label>
+                  <div className="auth-label-row">
+                    <label>Administrator Password</label>
+                    <button 
+                      type="button" 
+                      className="auth-link-btn-subtle"
+                      onClick={() => {
+                        setForgotIdentifier(adminIdentifier || '');
+                        setActiveTab('forgot-password');
+                        setForgotStep(1);
+                        setForgotError('');
+                        setForgotSuccess('');
+                      }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <div className="auth-input-wrapper">
                     <Lock size={18} className="input-icon" />
                     <input 
@@ -325,6 +434,194 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
             </div>
           )}
 
+          {/* ================= 1B. ADMIN FORGOT & RESET PASSWORD TAB ================= */}
+          {activeTab === 'forgot-password' && (
+            <div className="auth-tab-pane animate-fade-in">
+              <div className="auth-card-title-box">
+                <div className="admin-badge-pill">
+                  <Shield size={14} />
+                  <span>Executive Security</span>
+                </div>
+                <h2>Reset Admin Password</h2>
+                <p>
+                  {forgotStep === 1 
+                    ? 'Enter your registered Administrator Email Address or Admin Code to receive a 6-digit OTP reset code.' 
+                    : `Enter the 6-digit reset code sent to ${maskedEmail || 'your email'} and create your new password.`}
+                </p>
+              </div>
+
+              {forgotError && (
+                <div className="auth-alert alert-danger animate-shake">
+                  <AlertCircle size={17} />
+                  <span>{forgotError}</span>
+                </div>
+              )}
+
+              {forgotSuccess && (
+                <div className="auth-alert alert-info animate-fade-in">
+                  <CheckCircle2 size={17} />
+                  <span>{forgotSuccess}</span>
+                </div>
+              )}
+
+              {/* Step 1: Request OTP Code */}
+              {forgotStep === 1 && (
+                <form onSubmit={handleAdminRequestResetCode} className="auth-form">
+                  <div className="auth-input-group">
+                    <label>Administrator Email or Admin Code <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Mail size={18} className="input-icon" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. admin@association.org or ADM-1001"
+                        value={forgotIdentifier}
+                        onChange={(e) => setForgotIdentifier(e.target.value)}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <span className="input-hint">A secure 6-digit OTP code will be sent to the administrator email on record.</span>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="auth-submit-btn admin-submit-btn"
+                    disabled={forgotLoading}
+                  >
+                    {forgotLoading ? (
+                      <span className="btn-spinner-text">Sending Admin Reset Code...</span>
+                    ) : (
+                      <>
+                        <span>Send 6-Digit Reset Code</span>
+                        <ArrowRight size={17} />
+                      </>
+                    )}
+                  </button>
+
+                  <div className="auth-footer-links">
+                    <button 
+                      type="button" 
+                      className="auth-link-text"
+                      onClick={() => { setActiveTab('login'); setForgotError(''); }}
+                    >
+                      ← Back to Admin Sign In
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Step 2: Enter OTP Code & Set New Password */}
+              {forgotStep === 2 && (
+                <form onSubmit={handleAdminResetPasswordSubmit} className="auth-form">
+                  {receivedOtpCode && (
+                    <div className="otp-badge-box">
+                      <div className="otp-badge-header">
+                        <Sparkles size={15} color="#10b981" />
+                        <span>Admin Reset Code Generated:</span>
+                      </div>
+                      <div className="otp-badge-content">
+                        <span className="otp-digit-display">{receivedOtpCode}</span>
+                        <button 
+                          type="button" 
+                          className="otp-copy-btn"
+                          onClick={() => handleCopyOtp(receivedOtpCode)}
+                        >
+                          {copiedOtp ? '✓ Copied' : 'Copy Code'}
+                        </button>
+                      </div>
+                      <p className="otp-badge-hint">Simulated dispatch logged. Enter the 6-digit code below.</p>
+                    </div>
+                  )}
+
+                  <div className="auth-input-group">
+                    <label>6-Digit Reset Code <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <KeyRound size={18} className="input-icon" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. 849201"
+                        maxLength={6}
+                        value={forgotResetCode}
+                        onChange={(e) => setForgotResetCode(e.target.value.replace(/\D/g, ''))}
+                        className="otp-code-input"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className="auth-input-group">
+                    <label>New Password <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Lock size={18} className="input-icon" />
+                      <input 
+                        type={showForgotNewPassword ? 'text' : 'password'}
+                        placeholder="At least 6 characters"
+                        value={forgotNewPassword}
+                        onChange={(e) => setForgotNewPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                      <button 
+                        type="button" 
+                        className="password-toggle-btn"
+                        onClick={() => setShowForgotNewPassword(!showForgotNewPassword)}
+                      >
+                        {showForgotNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="auth-input-group">
+                    <label>Confirm New Password <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Lock size={18} className="input-icon" />
+                      <input 
+                        type={showForgotNewPassword ? 'text' : 'password'}
+                        placeholder="Re-enter new password"
+                        value={forgotConfirmPassword}
+                        onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="auth-submit-btn success-btn"
+                    disabled={forgotLoading}
+                  >
+                    {forgotLoading ? (
+                      <span className="btn-spinner-text">Resetting Password...</span>
+                    ) : (
+                      <>
+                        <span>Update Password & Enter Admin Portal</span>
+                        <CheckCircle2 size={17} />
+                      </>
+                    )}
+                  </button>
+
+                  <div className="auth-footer-links auth-dual-links">
+                    <button 
+                      type="button" 
+                      className="auth-link-text-subtle"
+                      onClick={() => setForgotStep(1)}
+                    >
+                      Resend Code / Change Identifier
+                    </button>
+                    <button 
+                      type="button" 
+                      className="auth-link-text"
+                      onClick={() => { setActiveTab('login'); setForgotError(''); }}
+                    >
+                      ← Back to Admin Sign In
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
           {/* ================= 2. INITIAL ADMIN SETUP (ONLY IF NO ADMIN EXISTS) ================= */}
           {activeTab === 'register' && (
             <div className="auth-tab-pane animate-fade-in">
@@ -335,20 +632,43 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
                   </div>
                   <h3>Admin Account Already Registered</h3>
                   <p className="admin-locked-desc">
-                    An administrator account is already registered and active for <strong>Peace & Love, Adroabaa</strong>.
+                    An administrator account is already active for <strong>Peace & Love, Adroabaa</strong>.
+                    For security reasons, only one primary executive Admin account is allowed.
                   </p>
                   <div className="admin-locked-notice">
                     <Lock size={16} />
-                    <span>Only one primary Admin is permitted. Please sign in with your credentials.</span>
+                    <span>Please sign in using your existing administrator credentials or Google account.</span>
                   </div>
-                  <button 
-                    type="button" 
-                    className="auth-submit-btn"
-                    onClick={() => setActiveTab('login')}
-                  >
-                    <span>Sign In as Admin</span>
-                    <ArrowRight size={17} />
-                  </button>
+
+                  <div className="admin-locked-actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>
+                    <button 
+                      type="button" 
+                      className="auth-submit-btn admin-submit-btn"
+                      onClick={() => setActiveTab('login')}
+                    >
+                      <span>Sign In with Admin Account</span>
+                      <ArrowRight size={17} />
+                    </button>
+
+                    <button 
+                      type="button" 
+                      className="auth-submit-btn"
+                      style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.4)', color: '#a5b4fc' }}
+                      onClick={() => { setActiveTab('forgot-password'); setForgotStep(1); }}
+                    >
+                      <KeyRound size={16} />
+                      <span>Forgot Password? Reset Admin Access</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      className="auth-link-text"
+                      style={{ marginTop: '0.5rem', alignSelf: 'center' }}
+                      onClick={onSwitchToMember}
+                    >
+                      ← Regular Member? Go to Member Portal
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>

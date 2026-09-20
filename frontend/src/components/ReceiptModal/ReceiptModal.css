@@ -191,16 +191,34 @@
   margin: 22px 0;
 }
 
+.btn-whatsapp-share {
+  background: #25d366;
+  color: #ffffff;
+  border: 1px solid #20ba5a;
+}
+
+.btn-whatsapp-share:hover {
+  background: #20ba5a;
+}
+
 /* Status Banner */
 .receipt-status-banner {
-  background: var(--emerald-50);
-  border: 1px solid var(--emerald-100);
   border-radius: var(--radius-md);
   padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+}
+
+.receipt-status-banner.banner-paid {
+  background: var(--emerald-50);
+  border: 1px solid var(--emerald-100);
+}
+
+.receipt-status-banner.banner-pending {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
 }
 
 .status-indicator {
@@ -213,18 +231,33 @@
   color: var(--emerald-600);
 }
 
-.status-text {
+.status-icon-pending {
+  color: #f59e0b;
+}
+
+.banner-paid .status-text {
   font-size: 0.88rem;
   color: var(--emerald-800);
 }
 
-.status-subtext {
+.banner-paid .status-subtext {
   display: block;
   font-size: 0.72rem;
   color: var(--emerald-700);
 }
 
-.receipt-stamp {
+.banner-pending .status-text {
+  font-size: 0.88rem;
+  color: #92400e;
+}
+
+.banner-pending .status-subtext {
+  display: block;
+  font-size: 0.72rem;
+  color: #78350f;
+}
+
+.banner-paid .receipt-stamp {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -233,6 +266,20 @@
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   border: 2px dashed var(--emerald-500);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transform: rotate(-3deg);
+}
+
+.banner-pending .receipt-stamp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #92400e;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border: 2px dashed #f59e0b;
   padding: 4px 10px;
   border-radius: var(--radius-sm);
   transform: rotate(-3deg);

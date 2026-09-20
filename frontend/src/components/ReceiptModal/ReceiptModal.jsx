@@ -10,7 +10,10 @@ import {
   Calendar,
   CreditCard,
   User,
-  Share2
+  Share2,
+  Clock,
+  MessageCircle,
+  AlertTriangle
 } from 'lucide-react';
 import './ReceiptModal.css';
 
@@ -19,6 +22,7 @@ export default function ReceiptModal({ receipt, onClose, onShowToast }) {
 
   const member = receipt.member || {};
   const schedule = receipt.schedule || {};
+  const isPending = receipt.status === 'PENDING';
 
   const formattedDate = receipt.paymentDate 
     ? new Date(receipt.paymentDate).toLocaleString('en-US', {
@@ -34,8 +38,21 @@ export default function ReceiptModal({ receipt, onClose, onShowToast }) {
   const handleCopyReceiptNumber = () => {
     navigator.clipboard.writeText(receipt.receiptNumber);
     if (onShowToast) {
-      onShowToast('Copied!', `Receipt #${receipt.receiptNumber} copied to clipboard`, 'success');
+      onShowToast('Copied!', `Payment Code #${receipt.receiptNumber} copied to clipboard`, 'success');
     }
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = encodeURIComponent(
+      `🇬🇭 *PEACE & LOVE, ADROABAA - PAYMENT VOUCHER*\n\n` +
+      `👤 *Member:* ${member.firstName || ''} ${member.lastName || ''}\n` +
+      `📌 *Levy:* ${schedule.title || receipt.duesPurpose || 'Dues Levy'}\n` +
+      `💵 *Amount:* $${Number(receipt.amountPaid || 0).toFixed(2)}\n` +
+      `🏷️ *Payment Reference Code:* *${receipt.receiptNumber}*\n` +
+      `⏳ *Status:* ${receipt.status || 'PENDING'}\n\n` +
+      `Official Voucher from Peace & Love, Adroabaa Portal.`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   return (
@@ -46,11 +63,15 @@ export default function ReceiptModal({ receipt, onClose, onShowToast }) {
           <div className="receipt-action-group">
             <button className="receipt-btn btn-print" onClick={handlePrint}>
               <Printer size={16} />
-              <span>Print Official Receipt</span>
+              <span>Print {isPending ? 'Payment Voucher' : 'Official Receipt'}</span>
             </button>
             <button className="receipt-btn btn-copy" onClick={handleCopyReceiptNumber}>
               <Share2 size={16} />
-              <span>Copy Ref #</span>
+              <span>Copy Code</span>
+            </button>
+            <button className="receipt-btn btn-whatsapp-share" onClick={handleShareWhatsApp}>
+              <MessageCircle size={16} />
+              <span>Share WhatsApp</span>
             </button>
           </div>
           <button className="receipt-close-btn" onClick={onClose} aria-label="Close">
@@ -68,13 +89,13 @@ export default function ReceiptModal({ receipt, onClose, onShowToast }) {
               </div>
               <div className="receipt-title-block">
                 <h2>PEACE & LOVE, ADROABAA</h2>
-                <p className="receipt-subtitle">Official Dues & Contribution Electronic Receipt</p>
+                <p className="receipt-subtitle">Official Dues & Contribution Electronic {isPending ? 'Payment Voucher' : 'Receipt'}</p>
                 <p className="receipt-secretariat">Secretariat • Adroabaa</p>
               </div>
             </div>
 
             <div className="receipt-number-badge">
-              <span className="badge-tag">RECEIPT VOUCHER</span>
+              <span className="badge-tag">{isPending ? 'PAYMENT CODE' : 'RECEIPT VOUCHER'}</span>
               <span className="badge-number">{receipt.receiptNumber}</span>
               <span className="badge-date">{formattedDate}</span>
             </div>
@@ -83,17 +104,27 @@ export default function ReceiptModal({ receipt, onClose, onShowToast }) {
           <div className="receipt-divider"></div>
 
           {/* Verification Watermark Banner */}
-          <div className="receipt-status-banner">
+          <div className={`receipt-status-banner ${isPending ? 'banner-pending' : 'banner-paid'}`}>
             <div className="status-indicator">
-              <CheckCircle size={20} className="status-icon-paid" />
+              {isPending ? (
+                <Clock size={22} className="status-icon-pending" />
+              ) : (
+                <CheckCircle size={22} className="status-icon-paid" />
+              )}
               <div>
-                <span className="status-text">PAYMENT STATUS: <strong>{receipt.status || 'PAID'}</strong></span>
-                <span className="status-subtext">Transaction successfully logged in Association General Ledger</span>
+                <span className="status-text">
+                  PAYMENT STATUS: <strong>{receipt.status || 'PAID'}</strong>
+                </span>
+                <span className="status-subtext">
+                  {isPending 
+                    ? 'Awaiting Administrator confirmation. Share reference code with Admin for verification.'
+                    : 'Transaction successfully verified & cleared in Association General Ledger.'}
+                </span>
               </div>
             </div>
             <div className="receipt-stamp">
               <ShieldCheck size={28} />
-              <span>OFFICIAL RECEIPT</span>
+              <span>{isPending ? 'SUBMITTED VOUCHER' : 'OFFICIAL RECEIPT'}</span>
             </div>
           </div>
 

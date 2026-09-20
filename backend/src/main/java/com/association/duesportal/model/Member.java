@@ -57,6 +57,10 @@ public class Member {
     @Column(nullable = false)
     private String role = "MEMBER"; // ADMIN, TREASURER, MEMBER
 
+    private String resetToken;
+
+    private java.time.LocalDateTime resetTokenExpiry;
+
     public Member() {
         this.joinDate = LocalDate.now();
         this.isPasswordSet = false;
@@ -216,5 +220,21 @@ public class Member {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public java.time.LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
     }
 }

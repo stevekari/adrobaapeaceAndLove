@@ -108,6 +108,16 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
     scrollToBottom();
   }, [messages]);
 
+  // Get active user with safe localStorage fallback
+  const activeUser = currentUser || (() => {
+    try {
+      const stored = localStorage.getItem('duesportal_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  })();
+
   // Send Standard Text / Quick Phrase Message
   const handleSendMessage = async (customContent = null, messageType = 'TEXT', customAttachment = null) => {
     const textToSend = customContent !== null ? customContent : inputText;
@@ -120,7 +130,9 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
     setIsSending(true);
     try {
       await api.sendChatMessage({
-        senderId: currentUser?.id,
+        senderId: activeUser?.id ? Number(activeUser.id) : null,
+        senderEmail: activeUser?.email || '',
+        memberCode: activeUser?.memberCode || '',
         channel: activeChannel,
         content: textToSend.trim(),
         messageType: messageType,

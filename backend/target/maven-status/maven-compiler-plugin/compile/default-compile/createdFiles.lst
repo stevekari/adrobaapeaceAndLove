@@ -27,6 +27,7 @@ com/association/duesportal/controller/RegistrationCodeController.class
 com/association/duesportal/model/Announcement.class
 com/association/duesportal/service/NotificationService.class
 com/association/duesportal/repository/RegistrationCodeRepository.class
+com/association/duesportal/dto/ForgotPasswordRequestDTO.class
 com/association/duesportal/dto/MemberDuesSummaryDTO.class
 com/association/duesportal/dto/DashboardStatsDTO.class
 com/association/duesportal/controller/ChatMessageController.class
@@ -48,6 +49,7 @@ com/association/duesportal/util/PasswordUtil.class
 com/association/duesportal/controller/MemberController.class
 com/association/duesportal/service/PaymentRecordService.class
 com/association/duesportal/service/MemberService.class
+com/association/duesportal/dto/ResetPasswordRequestDTO.class
 com/association/duesportal/controller/PaymentRecordController.class
 com/association/duesportal/dto/PaymentRequestDTO.class
 com/association/duesportal/service/AuthService.class

@@ -52,10 +52,10 @@ export default function BottomNav({
       badge: null
     },
     {
-      id: 'profile',
-      label: 'Profile',
-      icon: User,
-      isProfile: true
+      id: 'menu',
+      label: 'Menu',
+      icon: Menu,
+      isMenu: true
     }
   ];
 
@@ -85,7 +85,7 @@ export default function BottomNav({
       badge: null
     },
     {
-      id: 'profile',
+      id: 'menu',
       label: 'Menu',
       icon: Menu,
       isMenu: true
@@ -98,6 +98,9 @@ export default function BottomNav({
     if (tab.isMenu) {
       setSidebarOpen(!sidebarOpen);
       return;
+    }
+    if (sidebarOpen) {
+      setSidebarOpen(false);
     }
     if (tab.isCenterAction && onOpenPayModal) {
       onOpenPayModal();
@@ -118,7 +121,7 @@ export default function BottomNav({
       <div className="fb-bottom-nav-inner">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = currentTab === tab.id;
+          const isActive = tab.isMenu ? sidebarOpen : (currentTab === tab.id && !sidebarOpen);
 
           if (tab.isCenterAction) {
             return (
@@ -147,15 +150,22 @@ export default function BottomNav({
               aria-label={tab.label}
             >
               <div className="fb-icon-container">
-                {tab.isProfile && currentUser?.profilePhoto ? (
-                  <img 
-                    src={currentUser.profilePhoto} 
-                    alt="Profile" 
-                    className={`fb-profile-avatar ${isActive ? 'active-border' : ''}`} 
-                  />
-                ) : tab.isProfile ? (
-                  <div className={`fb-avatar-initials ${isActive ? 'active-border' : ''}`}>
-                    {getInitials()}
+                {tab.isMenu ? (
+                  <div className="fb-menu-avatar-wrapper">
+                    {currentUser?.profilePhoto ? (
+                      <img 
+                        src={currentUser.profilePhoto} 
+                        alt="Menu" 
+                        className={`fb-profile-avatar ${isActive ? 'active-border' : ''}`} 
+                      />
+                    ) : (
+                      <div className={`fb-avatar-initials ${isActive ? 'active-border' : ''}`}>
+                        {getInitials()}
+                      </div>
+                    )}
+                    <div className="fb-menu-mini-badge">
+                      <Menu size={10} />
+                    </div>
                   </div>
                 ) : (
                   <Icon size={22} className="fb-nav-icon" />

@@ -44,6 +44,8 @@ export const api = {
   registerAdmin: (adminData) => fetchJSON('/auth/register-admin', { method: 'POST', body: JSON.stringify(adminData) }),
   verifyMemberCode: (code) => fetchJSON(`/registration-codes/verify/${encodeURIComponent(code)}`).catch(() => fetchJSON(`/auth/verify-code/${encodeURIComponent(code)}`)),
   registerMemberWithCode: (data) => fetchJSON('/auth/register-member', { method: 'POST', body: JSON.stringify(data) }),
+  forgotPassword: (data) => fetchJSON('/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) }),
+  resetPassword: (data) => fetchJSON('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
 
   // Registration Code Generator & Redemption
   getRegistrationCodes: (status = 'ALL') =>

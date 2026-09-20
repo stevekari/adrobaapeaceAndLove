@@ -505,8 +505,16 @@
   }
 
   .navbar-logout-btn {
-    display: none;
-    /* Accessible inside the sidebar drawer on narrow phones */
+    display: flex;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-full);
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
   }
 
   .navbar-chat-btn,

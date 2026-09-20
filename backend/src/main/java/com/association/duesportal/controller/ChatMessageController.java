@@ -27,7 +27,7 @@ public class ChatMessageController {
     }
 
     @PostMapping("/messages")
-    public ResponseEntity<?> sendMessage(@Valid @RequestBody ChatMessageRequestDTO request) {
+    public ResponseEntity<?> sendMessage(@RequestBody ChatMessageRequestDTO request) {
         try {
             ChatMessageDTO created = chatMessageService.sendMessage(request);
             return new ResponseEntity<>(created, HttpStatus.CREATED);

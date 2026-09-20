@@ -2,13 +2,16 @@ package com.association.duesportal.service;
 
 import com.association.duesportal.dto.*;
 import com.association.duesportal.model.Member;
+import com.association.duesportal.model.RegistrationCode;
 import com.association.duesportal.repository.MemberRepository;
+import com.association.duesportal.repository.RegistrationCodeRepository;
 import com.association.duesportal.util.CodeGeneratorUtil;
 import com.association.duesportal.util.PasswordUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -18,9 +21,11 @@ import java.util.UUID;
 public class AuthService {
 
     private final MemberRepository memberRepository;
+    private final RegistrationCodeRepository registrationCodeRepository;
 
-    public AuthService(MemberRepository memberRepository) {
+    public AuthService(MemberRepository memberRepository, RegistrationCodeRepository registrationCodeRepository) {
         this.memberRepository = memberRepository;
+        this.registrationCodeRepository = registrationCodeRepository;
     }
 
     public AuthResponseDTO login(LoginRequestDTO request) {
@@ -89,6 +94,34 @@ public class AuthService {
             throw new IllegalArgumentException("A member or administrator is already registered with email: " + request.getEmail().trim());
         }
 
+        boolean hasExistingAdmin = memberRepository.countByRole("ADMIN") > 0;
+        RegistrationCode authorizedCode = null;
+
+        if (hasExistingAdmin) {
+            String passkey = request.getAdminPasskey();
+            if (passkey == null || passkey.trim().isEmpty()) {
+                throw new IllegalArgumentException("An Administrator account already exists. To register an additional administrator, you must provide a valid Admin Registration Code issued by the Executive Administrator.");
+            }
+
+            String cleanPasskey = passkey.trim().toUpperCase(Locale.ROOT);
+            authorizedCode = registrationCodeRepository.findByCodeIgnoreCase(cleanPasskey)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid Admin Registration Code (" + cleanPasskey + "). Please request an authorized registration code from the Executive Administrator."));
+
+            if ("REVOKED".equalsIgnoreCase(authorizedCode.getStatus())) {
+                throw new IllegalArgumentException("This Admin Registration Code has been revoked. Please request a new code from the Executive Administrator.");
+            }
+
+            if ("REDEEMED".equalsIgnoreCase(authorizedCode.getStatus())) {
+                String redeemedName = authorizedCode.getRedeemedBy() != null ? authorizedCode.getRedeemedBy().getFullName() : "another administrator";
+                throw new IllegalArgumentException("This Admin Registration Code (" + cleanPasskey + ") has already been redeemed by " + redeemedName + ". Each code is strictly single-use.");
+            }
+
+            String codeRole = authorizedCode.getRole() != null ? authorizedCode.getRole().toUpperCase(Locale.ROOT) : "MEMBER";
+            if (!"ADMIN".equals(codeRole) && !"TREASURER".equals(codeRole)) {
+                throw new IllegalArgumentException("The provided registration code (" + cleanPasskey + ") is for regular members and does not authorize Administrator privileges.");
+            }
+        }
+
         String role = "ADMIN";
         String prefix = "ADM";
         String memberCode = generateUniqueCode(prefix);
@@ -110,6 +143,14 @@ public class AuthService {
         admin.setIsPasswordSet(true);
 
         Member saved = memberRepository.save(admin);
+
+        if (authorizedCode != null) {
+            authorizedCode.setStatus("REDEEMED");
+            authorizedCode.setRedeemedBy(saved);
+            authorizedCode.setRedeemedAt(LocalDateTime.now());
+            registrationCodeRepository.save(authorizedCode);
+        }
+
         String token = "sess-" + UUID.randomUUID().toString();
         return new AuthResponseDTO(token, saved, "Admin registration successful for " + admin.getCompanyName() + "! Member Code: " + memberCode);
     }

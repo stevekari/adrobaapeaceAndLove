@@ -22,6 +22,9 @@ public class AuthServiceTests {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private com.association.duesportal.service.RegistrationCodeService registrationCodeService;
+
     @Test
     void testAdminLoginWithEmail() {
         Member admin = memberRepository.findByEmailIgnoreCase("stephen.karikari@association.org").orElseGet(() -> {
@@ -63,6 +66,10 @@ public class AuthServiceTests {
 
     @Test
     void testMultipleAdminRegistrationAllowed() {
+        // Reset admin accounts first to test founder admin vs subsequent admin
+        authService.resetAdminAccount();
+
+        // 1. Initial Founder Admin registers freely without a passkey
         String email1 = "primary.admin." + System.currentTimeMillis() + "@association.org";
         AdminRegisterRequestDTO primaryReq = new AdminRegisterRequestDTO(
                 "Primary", "Admin", email1, "+233 24 111 2222",
@@ -72,16 +79,43 @@ public class AuthServiceTests {
         assertNotNull(res1);
         assertEquals("ADMIN", res1.getRole());
 
-        // Registering a second admin is now allowed and succeeds
+        // 2. An unauthorized second person trying to register as admin WITHOUT a code fails
         String email2 = "second.admin." + System.currentTimeMillis() + "@association.org";
-        AdminRegisterRequestDTO secondReq = new AdminRegisterRequestDTO(
+        AdminRegisterRequestDTO secondReqNoCode = new AdminRegisterRequestDTO(
                 "Second", "Admin", email2, "+233 24 999 0000",
                 "secret123", "ADMIN", null
         );
-        AuthResponseDTO res2 = authService.registerAdmin(secondReq);
+        IllegalArgumentException exNoCode = assertThrows(IllegalArgumentException.class, () -> {
+            authService.registerAdmin(secondReqNoCode);
+        });
+        assertTrue(exNoCode.getMessage().contains("Admin Registration Code"));
+
+        // 3. Primary admin generates an official ADMIN registration code
+        var generatedList = registrationCodeService.generateCodes(new GenerateCodeRequestDTO(
+                "ADM", "ADMIN", 1, "Invite Second Executive", null
+        ));
+        String adminPasscode = generatedList.get(0).getCode();
+
+        // 4. Second admin registers WITH the authorized code -> succeeds!
+        AdminRegisterRequestDTO secondReqWithCode = new AdminRegisterRequestDTO(
+                "Second", "Admin", email2, "+233 24 999 0000",
+                "secret123", "ADMIN", adminPasscode
+        );
+        AuthResponseDTO res2 = authService.registerAdmin(secondReqWithCode);
         assertNotNull(res2);
         assertEquals("ADMIN", res2.getRole());
         assertEquals("Second", res2.getFirstName());
+
+        // 5. Trying to reuse the already REDEEMED code throws an error
+        String email3 = "third.admin." + System.currentTimeMillis() + "@association.org";
+        AdminRegisterRequestDTO thirdReqReusedCode = new AdminRegisterRequestDTO(
+                "Third", "Admin", email3, "+233 24 888 7777",
+                "secret123", "ADMIN", adminPasscode
+        );
+        IllegalArgumentException exReused = assertThrows(IllegalArgumentException.class, () -> {
+            authService.registerAdmin(thirdReqReusedCode);
+        });
+        assertTrue(exReused.getMessage().contains("already been redeemed"));
     }
 
     @Test

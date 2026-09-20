@@ -41,6 +41,14 @@ export const api = {
   login: (credentials) => fetchJSON('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
   googleLogin: (googleData) => fetchJSON('/auth/google-login', { method: 'POST', body: JSON.stringify(googleData) }),
   getAdminStatus: () => fetchJSON('/auth/admin-status'),
+  resetAdminAccount: async () => {
+    const members = await fetchJSON('/members').catch(() => []);
+    const admins = Array.isArray(members) ? members.filter(m => m.role === 'ADMIN' || m.role === 'TREASURER') : [];
+    for (const a of admins) {
+      await fetchJSON(`/members/${a.id}`, { method: 'DELETE' }).catch(() => null);
+    }
+    return { success: true, message: 'Admin accounts reset.' };
+  },
   registerAdmin: (adminData) => fetchJSON('/auth/register-admin', { method: 'POST', body: JSON.stringify(adminData) }),
   verifyMemberCode: (code) => fetchJSON(`/registration-codes/verify/${encodeURIComponent(code)}`).catch(() => fetchJSON(`/auth/verify-code/${encodeURIComponent(code)}`)),
   registerMemberWithCode: (data) => fetchJSON('/auth/register-member', { method: 'POST', body: JSON.stringify(data) }),

@@ -62,29 +62,26 @@ public class AuthServiceTests {
     }
 
     @Test
-    void testSingleAdminLockEnforcement() {
-        if (!authService.isAdminRegistered()) {
-            AdminRegisterRequestDTO primaryReq = new AdminRegisterRequestDTO(
-                    "Primary", "Admin", "primary.admin@association.org", "+233 24 111 2222",
-                    "admin123", "ADMIN", null
-            );
-            authService.registerAdmin(primaryReq);
-        }
+    void testMultipleAdminRegistrationAllowed() {
+        String email1 = "primary.admin." + System.currentTimeMillis() + "@association.org";
+        AdminRegisterRequestDTO primaryReq = new AdminRegisterRequestDTO(
+                "Primary", "Admin", email1, "+233 24 111 2222",
+                "admin123", "ADMIN", null
+        );
+        AuthResponseDTO res1 = authService.registerAdmin(primaryReq);
+        assertNotNull(res1);
+        assertEquals("ADMIN", res1.getRole());
 
-        assertTrue(authService.isAdminRegistered());
-
-        // Attempting to register another admin MUST fail
+        // Registering a second admin is now allowed and succeeds
+        String email2 = "second.admin." + System.currentTimeMillis() + "@association.org";
         AdminRegisterRequestDTO secondReq = new AdminRegisterRequestDTO(
-                "Second", "Admin", "second.admin@association.org", "+233 24 999 0000",
+                "Second", "Admin", email2, "+233 24 999 0000",
                 "secret123", "ADMIN", null
         );
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-            authService.registerAdmin(secondReq);
-        });
-
-        assertTrue(ex.getMessage().contains("already registered"));
-        assertTrue(ex.getMessage().contains("Only one Admin is permitted"));
+        AuthResponseDTO res2 = authService.registerAdmin(secondReq);
+        assertNotNull(res2);
+        assertEquals("ADMIN", res2.getRole());
+        assertEquals("Second", res2.getFirstName());
     }
 
     @Test

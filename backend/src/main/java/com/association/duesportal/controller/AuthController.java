@@ -59,6 +59,12 @@ public class AuthController {
         ));
     }
 
+    @PostMapping("/reset-admin-account")
+    public ResponseEntity<?> resetAdminAccount() {
+        authService.resetAdminAccount();
+        return ResponseEntity.ok(Map.of("success", true, "message", "Admin accounts cleared. You can now register a fresh Admin."));
+    }
+
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody AdminRegisterRequestDTO adminRequest) {
         try {

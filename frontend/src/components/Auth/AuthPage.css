@@ -518,6 +518,29 @@
   color: #a5b4fc;
 }
 
+.activate-account-link {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #0284c7;
+  font-weight: 700 !important;
+  text-decoration: underline;
+  text-decoration-color: #0284c7;
+  text-underline-offset: 3px;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.activate-account-link:hover {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
 /* Member Code Flow Specifics */
 .code-verify-card {
   background: rgba(15, 23, 42, 0.45);

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -78,13 +79,14 @@ public class AuthService {
         return memberRepository.countByRole("ADMIN") > 0;
     }
 
-    public AuthResponseDTO registerAdmin(AdminRegisterRequestDTO request) {
-        if (memberRepository.countByRole("ADMIN") > 0) {
-            throw new IllegalArgumentException("An Admin account is already registered and active for Peace & Love, Adroabaa. Only one Admin is permitted. Please contact the administrator for access.");
-        }
+    public void resetAdminAccount() {
+        List<Member> admins = memberRepository.findByRole("ADMIN");
+        memberRepository.deleteAll(admins);
+    }
 
+    public AuthResponseDTO registerAdmin(AdminRegisterRequestDTO request) {
         if (memberRepository.existsByEmailIgnoreCase(request.getEmail().trim())) {
-            throw new IllegalArgumentException("A member or admin is already registered with email: " + request.getEmail().trim());
+            throw new IllegalArgumentException("A member or administrator is already registered with email: " + request.getEmail().trim());
         }
 
         String role = "ADMIN";

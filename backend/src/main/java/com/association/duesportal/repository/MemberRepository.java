@@ -29,6 +29,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     long countByRole(String role);
 
+    List<Member> findByRole(String role);
+
     boolean existsByRole(String role);
 
     @Query("SELECT m FROM Member m WHERE " +

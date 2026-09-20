@@ -437,7 +437,7 @@ export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showTo
                   New Member with an Association Code?{' '}
                   <button 
                     type="button" 
-                    className="auth-link-text"
+                    className="auth-link-text activate-account-link"
                     onClick={() => setActiveTab('code-register')}
                   >
                     Activate Account Here

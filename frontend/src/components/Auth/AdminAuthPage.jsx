@@ -622,187 +622,151 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
             </div>
           )}
 
-          {/* ================= 2. INITIAL ADMIN SETUP (ONLY IF NO ADMIN EXISTS) ================= */}
+          {/* ================= 2. ADMIN REGISTRATION TAB (ALLOWS MULTIPLE ADMINS) ================= */}
           {activeTab === 'register' && (
             <div className="auth-tab-pane animate-fade-in">
-              {hasAdminAccount ? (
-                <div className="admin-locked-card">
-                  <div className="admin-locked-icon">
-                    <ShieldAlert size={36} color="#dc2626" />
+              <div className="auth-card-title-box">
+                <div className="admin-badge-pill">
+                  <ShieldCheck size={14} />
+                  <span>Executive Administration</span>
+                </div>
+                <h2>Register Administrator</h2>
+                <p>Create and activate an executive administrator account for Peace & Love, Adroabaa.</p>
+              </div>
+
+              {adminError && (
+                <div className="auth-alert alert-danger animate-shake">
+                  <AlertCircle size={17} />
+                  <span>{adminError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleAdminRegister} className="auth-form">
+                <div className="auth-row-2">
+                  <div className="auth-input-group">
+                    <label>First Name <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <User size={17} className="input-icon" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. Stephen"
+                        value={adminFirstName}
+                        onChange={(e) => setAdminFirstName(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
-                  <h3>Admin Account Already Registered</h3>
-                  <p className="admin-locked-desc">
-                    An administrator account is already active for <strong>Peace & Love, Adroabaa</strong>.
-                    For security reasons, only one primary executive Admin account is allowed.
-                  </p>
-                  <div className="admin-locked-notice">
-                    <Lock size={16} />
-                    <span>Please sign in using your existing administrator credentials or Google account.</span>
-                  </div>
 
-                  <div className="admin-locked-actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>
-                    <button 
-                      type="button" 
-                      className="auth-submit-btn admin-submit-btn"
-                      onClick={() => setActiveTab('login')}
-                    >
-                      <span>Sign In with Admin Account</span>
-                      <ArrowRight size={17} />
-                    </button>
-
-                    <button 
-                      type="button" 
-                      className="auth-submit-btn"
-                      style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.4)', color: '#a5b4fc' }}
-                      onClick={() => { setActiveTab('forgot-password'); setForgotStep(1); }}
-                    >
-                      <KeyRound size={16} />
-                      <span>Forgot Password? Reset Admin Access</span>
-                    </button>
-
-                    <button 
-                      type="button" 
-                      className="auth-link-text"
-                      style={{ marginTop: '0.5rem', alignSelf: 'center' }}
-                      onClick={onSwitchToMember}
-                    >
-                      ← Regular Member? Go to Member Portal
-                    </button>
+                  <div className="auth-input-group">
+                    <label>Last Name <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <User size={17} className="input-icon" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. Karikari"
+                        value={adminLastName}
+                        onChange={(e) => setAdminLastName(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className="auth-card-title-box">
-                    <div className="admin-badge-pill">
-                      <ShieldCheck size={14} />
-                      <span>System Initial Setup</span>
+
+                <div className="auth-row-2">
+                  <div className="auth-input-group">
+                    <label>Email Address <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Mail size={17} className="input-icon" />
+                      <input 
+                        type="email"
+                        placeholder="admin@association.org"
+                        value={adminEmail}
+                        onChange={(e) => setAdminEmail(e.target.value)}
+                        required
+                      />
                     </div>
-                    <h2>Setup Primary Administrator</h2>
-                    <p>Register the association's primary executive administrator account.</p>
                   </div>
 
-                  {adminError && (
-                    <div className="auth-alert alert-danger animate-shake">
-                      <AlertCircle size={17} />
-                      <span>{adminError}</span>
+                  <div className="auth-input-group">
+                    <label>Phone Number</label>
+                    <div className="auth-input-wrapper">
+                      <Phone size={17} className="input-icon" />
+                      <input 
+                        type="tel"
+                        placeholder="+233 24 123 4567"
+                        value={adminPhone}
+                        onChange={(e) => setAdminPhone(e.target.value)}
+                      />
                     </div>
+                  </div>
+                </div>
+
+                <div className="auth-row-2">
+                  <div className="auth-input-group">
+                    <label>Password <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Lock size={17} className="input-icon" />
+                      <input 
+                        type={showAdminPassword ? 'text' : 'password'}
+                        placeholder="At least 6 characters"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                      <button 
+                        type="button" 
+                        className="password-toggle-btn"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                      >
+                        {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="auth-input-group">
+                    <label>Confirm Password <span className="req">*</span></label>
+                    <div className="auth-input-wrapper">
+                      <Lock size={17} className="input-icon" />
+                      <input 
+                        type={showAdminPassword ? 'text' : 'password'}
+                        placeholder="Re-enter password"
+                        value={adminConfirmPassword}
+                        onChange={(e) => setAdminConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="auth-submit-btn admin-submit-btn"
+                  disabled={adminLoading}
+                >
+                  {adminLoading ? (
+                    <span>Registering Admin...</span>
+                  ) : (
+                    <>
+                      <span>Register Administrator</span>
+                      <ArrowRight size={17} />
+                    </>
                   )}
+                </button>
+              </form>
 
-                  <form onSubmit={handleAdminRegister} className="auth-form">
-                    <div className="auth-row-2">
-                      <div className="auth-input-group">
-                        <label>First Name <span className="req">*</span></label>
-                        <div className="auth-input-wrapper">
-                          <User size={17} className="input-icon" />
-                          <input 
-                            type="text"
-                            placeholder="e.g. Stephen"
-                            value={adminFirstName}
-                            onChange={(e) => setAdminFirstName(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="auth-input-group">
-                        <label>Last Name <span className="req">*</span></label>
-                        <div className="auth-input-wrapper">
-                          <User size={17} className="input-icon" />
-                          <input 
-                            type="text"
-                            placeholder="e.g. Karikari"
-                            value={adminLastName}
-                            onChange={(e) => setAdminLastName(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="auth-row-2">
-                      <div className="auth-input-group">
-                        <label>Email Address <span className="req">*</span></label>
-                        <div className="auth-input-wrapper">
-                          <Mail size={17} className="input-icon" />
-                          <input 
-                            type="email"
-                            placeholder="admin@association.org"
-                            value={adminEmail}
-                            onChange={(e) => setAdminEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="auth-input-group">
-                        <label>Phone Number</label>
-                        <div className="auth-input-wrapper">
-                          <Phone size={17} className="input-icon" />
-                          <input 
-                            type="tel"
-                            placeholder="+233 24 123 4567"
-                            value={adminPhone}
-                            onChange={(e) => setAdminPhone(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="auth-row-2">
-                      <div className="auth-input-group">
-                        <label>Password <span className="req">*</span></label>
-                        <div className="auth-input-wrapper">
-                          <Lock size={17} className="input-icon" />
-                          <input 
-                            type={showAdminPassword ? 'text' : 'password'}
-                            placeholder="At least 6 characters"
-                            value={adminPassword}
-                            onChange={(e) => setAdminPassword(e.target.value)}
-                            required
-                            minLength={6}
-                          />
-                          <button 
-                            type="button" 
-                            className="password-toggle-btn"
-                            onClick={() => setShowAdminPassword(!showAdminPassword)}
-                          >
-                            {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="auth-input-group">
-                        <label>Confirm Password <span className="req">*</span></label>
-                        <div className="auth-input-wrapper">
-                          <Lock size={17} className="input-icon" />
-                          <input 
-                            type={showAdminPassword ? 'text' : 'password'}
-                            placeholder="Re-enter password"
-                            value={adminConfirmPassword}
-                            onChange={(e) => setAdminConfirmPassword(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <button 
-                      type="submit" 
-                      className="auth-submit-btn admin-submit-btn"
-                      disabled={adminLoading}
-                    >
-                      {adminLoading ? (
-                        <span>Setting up Admin...</span>
-                      ) : (
-                        <>
-                          <span>Complete Initial Setup</span>
-                          <ArrowRight size={17} />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                </>
-              )}
+              <div className="auth-footer-links">
+                <p>
+                  Already registered as an Administrator?{' '}
+                  <button 
+                    type="button" 
+                    className="auth-link-text"
+                    onClick={() => setActiveTab('login')}
+                  >
+                    Sign In Here
+                  </button>
+                </p>
+              </div>
             </div>
           )}
         </div>

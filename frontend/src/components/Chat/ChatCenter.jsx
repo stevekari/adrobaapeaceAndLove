@@ -22,8 +22,26 @@ import {
   Check,
   X
 } from 'lucide-react';
-import { api } from '../../services/api';
-import './ChatCenter.css';
+// Helper for distinct WhatsApp sender name colors in group chats
+const SENDER_COLORS = [
+  '#059669', // Emerald green
+  '#0284c7', // Sky blue
+  '#d97706', // Amber orange
+  '#7c3aed', // Purple
+  '#db2777', // Pink
+  '#0d9488', // Teal
+  '#ea580c', // Dark orange
+  '#4f46e5', // Indigo
+];
+
+const getSenderColor = (str) => {
+  if (!str) return '#059669';
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return SENDER_COLORS[Math.abs(hash) % SENDER_COLORS.length];
+};
 
 export default function ChatCenter({ currentUser, userRole, onShowToast }) {
   const [activeChannel, setActiveChannel] = useState('GENERAL'); // 'GENERAL' | 'SUPPORT' | 'WELFARE'
@@ -371,8 +389,8 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
             </div>
           ) : (
             messages.map((msg) => {
-              const isOwnMessage = currentUser && msg.senderId === currentUser.id;
-              const isOfficer = msg.senderRole === 'ADMIN' || msg.senderRole === 'TREASURER';
+              const isOwnMessage = currentUser && (msg.senderId === currentUser.id || (currentUser.email && msg.senderEmail === currentUser.email));
+              const senderColor = getSenderColor(msg.senderName || msg.senderEmail || String(msg.senderId));
 
               return (
                 <div 
@@ -381,47 +399,39 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                 >
                   {/* Sender Avatar for other messages */}
                   {!isOwnMessage && (
-                    <div className={`chat-avatar-circle ${msg.senderRole?.toLowerCase() || 'member'}`}>
-                      {msg.senderName ? msg.senderName[0] : 'U'}
+                    <div 
+                      className={`chat-avatar-circle ${msg.senderRole?.toLowerCase() || 'member'}`}
+                      style={{ background: `linear-gradient(135deg, ${senderColor}, #1e293b)` }}
+                    >
+                      {msg.senderName ? msg.senderName[0].toUpperCase() : 'U'}
                     </div>
                   )}
 
                   <div className="chat-bubble-wrapper">
-                    {/* Header with Name & Role Badge */}
-                    <div className="chat-bubble-header">
-                      <span className="chat-sender-name">
-                        {isOwnMessage ? 'You' : msg.senderName}
-                      </span>
-                      
-                      <span className={`chat-role-tag role-${msg.senderRole?.toLowerCase() || 'member'}`}>
-                        {msg.senderRole === 'ADMIN' && 'Admin 🛡️'}
-                        {msg.senderRole === 'TREASURER' && 'Treasurer 💳'}
-                        {msg.senderRole === 'MEMBER' && 'Member 👤'}
-                      </span>
-
-                      {msg.senderMemberCode && (
-                        <span className="chat-code-pill">{msg.senderMemberCode}</span>
-                      )}
-
-                      <span className="chat-timestamp">
-                        <Clock size={11} />
-                        {formatTime(msg.createdAt)}
-                      </span>
-
-                      {/* Admin Delete Action */}
-                      {(userRole === 'ADMIN' || isOwnMessage) && (
-                        <button 
-                          className="msg-delete-btn"
-                          onClick={() => handleDeleteMessage(msg.id)}
-                          title="Delete message"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Message Body */}
+                    {/* WhatsApp Style Message Bubble */}
                     <div className={`chat-bubble-content ${msg.messageType === 'QUICK_PHRASE' ? 'quick-phrase-bubble' : ''}`}>
+                      {/* WhatsApp Group Sender Header (Only for incoming messages) */}
+                      {!isOwnMessage && (
+                        <div className="whatsapp-sender-header">
+                          <span className="whatsapp-sender-name" style={{ color: senderColor }}>
+                            {msg.senderName || 'Member'}
+                          </span>
+                          
+                          {msg.senderRole && (
+                            <span className={`chat-role-tag role-${msg.senderRole.toLowerCase()}`}>
+                              {msg.senderRole === 'ADMIN' && 'Admin 🛡️'}
+                              {msg.senderRole === 'TREASURER' && 'Treasurer 💳'}
+                              {msg.senderRole === 'MEMBER' && 'Member 👤'}
+                            </span>
+                          )}
+
+                          {msg.senderMemberCode && (
+                            <span className="chat-code-pill">{msg.senderMemberCode}</span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Text Content */}
                       {msg.content && <p className="msg-text">{msg.content}</p>}
 
                       {/* Voice Note Player */}
@@ -432,7 +442,7 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                             onClick={() => handlePlayAudio(msg.id, msg.attachmentData)}
                             aria-label="Play Voice Note"
                           >
-                            {playingAudioId === msg.id ? <Pause size={16} /> : <Play size={16} />}
+                            {playingAudioId === msg.id ? <Pause size={15} /> : <Play size={15} />}
                           </button>
                           <div className="voice-track-bar">
                             <div className="voice-wave-bars">
@@ -443,10 +453,10 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                               <span className={`bar ${playingAudioId === msg.id ? 'active' : ''}`}></span>
                             </div>
                             <span className="voice-label">
-                              {playingAudioId === msg.id ? 'Playing Voice Clip...' : 'Voice Note Message'}
+                              {playingAudioId === msg.id ? 'Playing Voice Note...' : 'Voice Note'}
                             </span>
                           </div>
-                          <Volume2 size={16} className="voice-icon" />
+                          <Volume2 size={15} className="voice-icon" />
                         </div>
                       )}
 
@@ -456,6 +466,31 @@ export default function ChatCenter({ currentUser, userRole, onShowToast }) {
                           <img src={msg.attachmentData} alt="Shared Attachment" className="chat-attached-image" />
                         </div>
                       )}
+
+                      {/* WhatsApp Bubble Bottom Metadata: Time + Checkmark + Delete Action */}
+                      <div className="whatsapp-bubble-meta">
+                        <span className="chat-timestamp">
+                          {formatTime(msg.createdAt)}
+                        </span>
+                        
+                        {isOwnMessage && (
+                          <span className="whatsapp-checks" title="Delivered">
+                            ✓✓
+                          </span>
+                        )}
+
+                        {/* Admin / Owner Delete Action */}
+                        {(userRole === 'ADMIN' || isOwnMessage) && (
+                          <button 
+                            type="button"
+                            className="msg-delete-btn"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            title="Delete message"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

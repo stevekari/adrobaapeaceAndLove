@@ -1,0 +1,228 @@
+/* Facebook-Style Mobile Bottom Navigation Bar */
+.fb-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100vw;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  z-index: 999;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+
+.fb-bottom-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 56px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 8px;
+  position: relative;
+}
+
+.fb-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  padding: 4px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fb-nav-item:active {
+  transform: scale(0.92);
+}
+
+.fb-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.fb-nav-icon {
+  color: #64748b;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.fb-nav-item.active .fb-nav-icon {
+  color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.fb-nav-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease, font-weight 0.15s ease;
+}
+
+.fb-nav-item.active .fb-nav-label {
+  color: #0284c7;
+  font-weight: 800;
+}
+
+/* Facebook Active Top Bar Indicator */
+.fb-active-indicator {
+  position: absolute;
+  top: 0;
+  width: 32px;
+  height: 3px;
+  background: #0284c7;
+  border-radius: 0 0 3px 3px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Center Highlighted Action Button (Pay Dues / Record) */
+.fb-center-action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  margin-top: -12px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fb-center-action-btn:active {
+  transform: scale(0.92);
+}
+
+.fb-center-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.45);
+  border: 3px solid #ffffff;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.fb-center-action-btn.active .fb-center-icon-wrapper {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
+}
+
+.fb-center-sparkle {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  color: #fbbf24;
+}
+
+.fb-center-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0284c7;
+  margin-top: 2px;
+}
+
+/* Badges */
+.fb-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+}
+
+.fb-badge-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 1.5px solid #ffffff;
+}
+
+/* Profile Avatar in Bottom Nav */
+.fb-profile-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.fb-profile-avatar.active-border {
+  border-color: #0284c7;
+}
+
+.fb-avatar-initials {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid transparent;
+}
+
+.fb-avatar-initials.active-border {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3);
+}
+
+/* Enable on screens <= 768px */
+@media (max-width: 768px) {
+  .fb-bottom-nav {
+    display: block;
+  }
+
+  /* Add bottom padding to portal content view so it never overlaps the bottom nav */
+  .portal-content-view {
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Adjust PWA banner position on mobile when bottom nav is present */
+  .pwa-install-banner {
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

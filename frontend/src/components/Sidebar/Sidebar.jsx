@@ -11,7 +11,8 @@ import {
   LogOut,
   User,
   KeyRound,
-  Hash
+  Hash,
+  Smartphone
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -197,6 +198,19 @@ export default function Sidebar({
               <span>👤 Member: {currentUser?.memberCode || 'Active'}</span>
             )}
           </div>
+
+          <button 
+            type="button" 
+            className="sidebar-install-app-btn" 
+            onClick={() => {
+              sessionStorage.removeItem('pwa_banner_dismissed');
+              window.dispatchEvent(new CustomEvent('trigger-pwa-install'));
+            }}
+            title="Add to Home Screen"
+          >
+            <Smartphone size={15} />
+            <span>Install App on Phone</span>
+          </button>
 
           <button className="sidebar-logout-btn" onClick={onLogout} title="Log out">
             <LogOut size={15} />

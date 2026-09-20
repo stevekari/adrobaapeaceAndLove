@@ -17,6 +17,7 @@
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/ChatMessageRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/DashboardStatsDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/GenerateCodeRequestDTO.java
+/Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/GoogleLoginRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/LoginRequestDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/MemberCodeVerifyDTO.java
 /Users/stephenkarikari/Documents/DuesPortal/backend/src/main/java/com/association/duesportal/dto/MemberDuesSummaryDTO.java

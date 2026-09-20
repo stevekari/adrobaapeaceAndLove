@@ -50,6 +50,30 @@ public class AuthService {
         return new AuthResponseDTO(token, member, "Login successful. Welcome back, " + member.getFirstName() + "!");
     }
 
+    public AuthResponseDTO googleLogin(GoogleLoginRequestDTO request) {
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Google account email is required.");
+        }
+
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        Member member = memberRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new IllegalArgumentException("NO_ACCOUNT_FOUND: No registered member found with Google email (" + email + "). Please activate your account with your Member Registration Code."));
+
+        if ("SUSPENDED".equalsIgnoreCase(member.getStatus())) {
+            throw new IllegalArgumentException("This account is currently suspended. Please contact the association secretariat.");
+        }
+
+        // Auto-fill profile photo if member doesn't have one
+        if ((member.getProfilePhoto() == null || member.getProfilePhoto().trim().isEmpty()) 
+                && request.getPhotoUrl() != null && !request.getPhotoUrl().trim().isEmpty()) {
+            member.setProfilePhoto(request.getPhotoUrl().trim());
+            memberRepository.save(member);
+        }
+
+        String token = "sess-" + UUID.randomUUID().toString();
+        return new AuthResponseDTO(token, member, "Signed in successfully with Google. Welcome back, " + member.getFirstName() + "!");
+    }
+
     public boolean isAdminRegistered() {
         return memberRepository.countByRole("ADMIN") > 0;
     }

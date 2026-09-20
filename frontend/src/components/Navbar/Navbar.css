@@ -1,5 +1,8 @@
 .portal-navbar {
   height: var(--header-height);
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-light);
   display: flex;
@@ -365,35 +368,84 @@
   }
 
   .portal-navbar {
-    padding: 0 16px;
+    padding: 0 14px;
+    height: 60px;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .logout-btn-text {
     display: none;
   }
-}
 
-@media (max-width: 640px) {
-  .portal-navbar {
-    padding: 0 12px;
-    height: 62px;
+  .navbar-left {
+    gap: 10px;
+    min-width: 0;
+    flex-shrink: 1;
   }
 
-  .brand-icon-wrapper {
-    width: 34px;
-    height: 34px;
+  .navbar-branding {
+    min-width: 0;
+    overflow: hidden;
   }
 
   .brand-title {
-    font-size: 1rem;
-  }
-
-  .navbar-left {
-    gap: 8px;
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .navbar-right {
     gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .navbar-chat-btn span {
+    display: none;
+  }
+
+  .navbar-chat-btn {
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .portal-navbar {
+    padding: 0 10px;
+    height: 56px;
+  }
+
+  .brand-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .brand-icon-wrapper svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .brand-title {
+    font-size: 0.95rem;
+  }
+
+  .navbar-left {
+    gap: 6px;
+  }
+
+  .sidebar-toggle-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .navbar-right {
+    gap: 6px;
   }
 
   .user-profile-info {
@@ -401,43 +453,81 @@
   }
 
   .navbar-user-profile {
-    padding: 2px;
+    padding: 0;
     background: transparent;
     border: none;
   }
 
-  .navbar-pay-cta {
-    padding: 6px 10px;
-    font-size: 0.78rem;
+  .user-photo-img,
+  .user-avatar-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
   }
 
-  .navbar-chat-btn {
-    padding: 6px 10px;
-    font-size: 0.78rem;
-  }
-}
-
-@media (max-width: 480px) {
-
-  .navbar-chat-btn span,
   .navbar-pay-cta span {
     display: none;
   }
 
-  .navbar-chat-btn,
   .navbar-pay-cta {
-    padding: 8px;
+    padding: 0;
+    width: 34px;
+    height: 34px;
     border-radius: var(--radius-full);
-    width: 36px;
-    height: 36px;
     justify-content: center;
   }
 
-  .navbar-icon-btn,
+  .navbar-icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
   .navbar-logout-btn {
     width: 34px;
     height: 34px;
     padding: 0;
     justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .portal-navbar {
+    padding: 0 8px;
+  }
+
+  .brand-title {
+    font-size: 0.88rem;
+    max-width: 110px;
+  }
+
+  .navbar-right {
+    gap: 4px;
+  }
+
+  .navbar-logout-btn {
+    display: none;
+    /* Accessible inside the sidebar drawer on narrow phones */
+  }
+
+  .navbar-chat-btn,
+  .navbar-pay-cta,
+  .navbar-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sidebar-toggle-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-icon-wrapper {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
   }
 }

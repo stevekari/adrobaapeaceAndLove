@@ -29,6 +29,25 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/google-login")
+    public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequestDTO googleRequest) {
+        try {
+            AuthResponseDTO response = authService.googleLogin(googleRequest);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            boolean isNotRegistered = e.getMessage() != null && e.getMessage().startsWith("NO_ACCOUNT_FOUND");
+            return ResponseEntity.status(isNotRegistered ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "error", e.getMessage(),
+                            "registered", !isNotRegistered,
+                            "email", googleRequest.getEmail(),
+                            "firstName", googleRequest.getFirstName() != null ? googleRequest.getFirstName() : "",
+                            "lastName", googleRequest.getLastName() != null ? googleRequest.getLastName() : "",
+                            "photoUrl", googleRequest.getPhotoUrl() != null ? googleRequest.getPhotoUrl() : ""
+                    ));
+        }
+    }
+
     @GetMapping("/admin-status")
     public ResponseEntity<Map<String, Object>> getAdminStatus() {
         boolean hasAdmin = authService.isAdminRegistered();

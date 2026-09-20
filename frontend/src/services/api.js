@@ -15,20 +15,23 @@ async function fetchJSON(endpoint, options = {}) {
 
   if (!response.ok) {
     let errorMsg = `Error ${response.status}: ${response.statusText}`;
+    let errData = {};
     try {
       const errObj = await response.json();
-      if (errObj && (errObj.error || errObj.message)) {
-        errorMsg = errObj.error || errObj.message;
+      if (errObj) {
+        errData = errObj;
+        if (errObj.error || errObj.message) {
+          errorMsg = errObj.error || errObj.message;
+        }
       }
     } catch {
       // Ignored
     }
-    throw new Error(errorMsg);
+    const error = new Error(errorMsg);
+    Object.assign(error, errData, { status: response.status });
+    throw error;
   }
 
-  if (response.status === 204) {
-    return null;
-  }
 
   return response.json();
 }
@@ -36,6 +39,7 @@ async function fetchJSON(endpoint, options = {}) {
 export const api = {
   // Authentication
   login: (credentials) => fetchJSON('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
+  googleLogin: (googleData) => fetchJSON('/auth/google-login', { method: 'POST', body: JSON.stringify(googleData) }),
   getAdminStatus: () => fetchJSON('/auth/admin-status'),
   registerAdmin: (adminData) => fetchJSON('/auth/register-admin', { method: 'POST', body: JSON.stringify(adminData) }),
   verifyMemberCode: (code) => fetchJSON(`/registration-codes/verify/${encodeURIComponent(code)}`).catch(() => fetchJSON(`/auth/verify-code/${encodeURIComponent(code)}`)),

@@ -1,0 +1,180 @@
+import React from 'react';
+import { 
+  Home, 
+  MessageSquare, 
+  CreditCard, 
+  Receipt, 
+  User, 
+  Users, 
+  KeyRound, 
+  Menu,
+  Sparkles,
+  CalendarClock
+} from 'lucide-react';
+import './BottomNav.css';
+
+export default function BottomNav({ 
+  currentTab, 
+  onNavigateTab, 
+  userRole, 
+  currentUser,
+  onOpenPayModal,
+  sidebarOpen,
+  setSidebarOpen,
+  unreadCount = 0
+}) {
+  const isAdmin = userRole === 'ADMIN' || userRole === 'TREASURER';
+
+  const memberTabs = [
+    {
+      id: 'dashboard',
+      label: 'Home',
+      icon: Home,
+      badge: null
+    },
+    {
+      id: 'chat',
+      label: 'Chat',
+      icon: MessageSquare,
+      badge: unreadCount > 0 ? unreadCount : null,
+      isDot: unreadCount === 0
+    },
+    {
+      id: 'pay-dues',
+      label: 'Pay Dues',
+      icon: CreditCard,
+      isCenterAction: true
+    },
+    {
+      id: 'history',
+      label: 'Receipts',
+      icon: Receipt,
+      badge: null
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: User,
+      isProfile: true
+    }
+  ];
+
+  const adminTabs = [
+    {
+      id: 'dashboard',
+      label: 'Home',
+      icon: Home,
+      badge: null
+    },
+    {
+      id: 'members',
+      label: 'Members',
+      icon: Users,
+      badge: null
+    },
+    {
+      id: 'pay-dues',
+      label: 'Record',
+      icon: CreditCard,
+      isCenterAction: true
+    },
+    {
+      id: 'codes',
+      label: 'Codes',
+      icon: KeyRound,
+      badge: null
+    },
+    {
+      id: 'profile',
+      label: 'Menu',
+      icon: Menu,
+      isMenu: true
+    }
+  ];
+
+  const tabs = isAdmin ? adminTabs : memberTabs;
+
+  const handleTabClick = (tab) => {
+    if (tab.isMenu) {
+      setSidebarOpen(!sidebarOpen);
+      return;
+    }
+    if (tab.isCenterAction && onOpenPayModal) {
+      onOpenPayModal();
+      return;
+    }
+    onNavigateTab(tab.id);
+  };
+
+  const getInitials = () => {
+    if (!currentUser) return 'U';
+    const f = currentUser.firstName ? currentUser.firstName[0] : '';
+    const l = currentUser.lastName ? currentUser.lastName[0] : '';
+    return `${f}${l}`.toUpperCase() || 'U';
+  };
+
+  return (
+    <nav className="fb-bottom-nav" aria-label="Mobile Bottom Navigation">
+      <div className="fb-bottom-nav-inner">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = currentTab === tab.id;
+
+          if (tab.isCenterAction) {
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                className={`fb-center-action-btn ${isActive ? 'active' : ''}`}
+                onClick={() => handleTabClick(tab)}
+                aria-label={tab.label}
+              >
+                <div className="fb-center-icon-wrapper">
+                  <CreditCard size={22} className="fb-center-icon" />
+                  <Sparkles size={12} className="fb-center-sparkle" />
+                </div>
+                <span className="fb-nav-label fb-center-label">{tab.label}</span>
+              </button>
+            );
+          }
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              className={`fb-nav-item ${isActive ? 'active' : ''}`}
+              onClick={() => handleTabClick(tab)}
+              aria-label={tab.label}
+            >
+              <div className="fb-icon-container">
+                {tab.isProfile && currentUser?.profilePhoto ? (
+                  <img 
+                    src={currentUser.profilePhoto} 
+                    alt="Profile" 
+                    className={`fb-profile-avatar ${isActive ? 'active-border' : ''}`} 
+                  />
+                ) : tab.isProfile ? (
+                  <div className={`fb-avatar-initials ${isActive ? 'active-border' : ''}`}>
+                    {getInitials()}
+                  </div>
+                ) : (
+                  <Icon size={22} className="fb-nav-icon" />
+                )}
+
+                {tab.badge && (
+                  <span className="fb-badge-count">{tab.badge}</span>
+                )}
+                {tab.isDot && (
+                  <span className="fb-badge-dot"></span>
+                )}
+              </div>
+              <span className="fb-nav-label">{tab.label}</span>
+              {isActive && <div className="fb-active-indicator" />}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+

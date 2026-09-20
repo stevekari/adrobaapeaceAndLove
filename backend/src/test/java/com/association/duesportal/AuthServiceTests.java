@@ -142,4 +142,41 @@ public class AuthServiceTests {
         assertDoesNotThrow(() -> memberService.deleteMember(savedAuthor.getId()));
         assertFalse(memberRepository.existsById(savedAuthor.getId()));
     }
+
+    @Test
+    void testGoogleLoginSuccess() {
+        String googleEmail = "google.member." + System.currentTimeMillis() + "@gmail.com";
+        Member member = new Member(
+                "Kofi", "Google", googleEmail, "+233 24 555 6677",
+                "East Legon", "Accra", "https://lh3.googleusercontent.com/a/test-photo", "Consultant",
+                LocalDate.now(), "ACTIVE", "MEMBER",
+                "MEM-GGL-" + (System.currentTimeMillis() % 10000),
+                PasswordUtil.hashPassword("secretPass123"), true
+        );
+        memberRepository.save(member);
+
+        GoogleLoginRequestDTO req = new GoogleLoginRequestDTO(
+                googleEmail, "Kofi", "Google", "https://lh3.googleusercontent.com/a/test-photo", "google-uid-12345"
+        );
+
+        AuthResponseDTO res = authService.googleLogin(req);
+        assertNotNull(res);
+        assertNotNull(res.getToken());
+        assertEquals("Kofi", res.getFirstName());
+        assertEquals(googleEmail, res.getEmail());
+    }
+
+    @Test
+    void testGoogleLoginUnregisteredThrowsNoAccountFound() {
+        String unregisteredEmail = "unregistered." + System.currentTimeMillis() + "@gmail.com";
+        GoogleLoginRequestDTO req = new GoogleLoginRequestDTO(
+                unregisteredEmail, "New", "User", null, "google-uid-99999"
+        );
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            authService.googleLogin(req);
+        });
+
+        assertTrue(ex.getMessage().contains("NO_ACCOUNT_FOUND"));
+    }
 }

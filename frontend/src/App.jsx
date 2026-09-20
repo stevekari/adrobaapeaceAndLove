@@ -16,6 +16,8 @@ import AnnouncementModal from './components/Announcements/AnnouncementModal';
 import ReceiptModal from './components/ReceiptModal/ReceiptModal';
 import ChatCenter from './components/Chat/ChatCenter';
 import AuthPage from './components/Auth/AuthPage';
+import BottomNav from './components/BottomNav/BottomNav';
+import PWAInstallBanner from './components/PWA/PWAInstallBanner';
 import Toast from './components/Toast/Toast';
 import { api } from './services/api';
 import './App.css';
@@ -311,6 +313,7 @@ export default function App() {
       <div className="portal-root-layout">
         <Toast toasts={toasts} onDismiss={dismissToast} />
         <AuthPage onLoginSuccess={handleLoginSuccess} showToast={showToast} />
+        <PWAInstallBanner />
       </div>
     );
   }
@@ -498,6 +501,21 @@ export default function App() {
         announcementToEdit={null}
         members={members}
       />
+
+      {/* Facebook-Style Mobile Bottom Navigation Bar */}
+      <BottomNav
+        currentTab={currentTab}
+        onNavigateTab={setCurrentTab}
+        userRole={userRole}
+        currentUser={currentUser}
+        onOpenPayModal={() => handleOpenPayModal()}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        unreadCount={announcements.length}
+      />
+
+      {/* Global PWA Install on Home Screen Assistant */}
+      <PWAInstallBanner />
     </div>
   );
 }

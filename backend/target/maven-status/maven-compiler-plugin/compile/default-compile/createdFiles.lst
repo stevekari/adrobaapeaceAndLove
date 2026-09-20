@@ -3,6 +3,7 @@ com/association/duesportal/dto/AuthResponseDTO.class
 com/association/duesportal/repository/ChatMessageRepository.class
 com/association/duesportal/config/SpaWebConfig.class
 com/association/duesportal/config/CorsConfig.class
+com/association/duesportal/dto/GoogleLoginRequestDTO.class
 com/association/duesportal/dto/GenerateCodeRequestDTO.class
 com/association/duesportal/dto/RedeemCodeRequestDTO.class
 com/association/duesportal/util/CodeGeneratorUtil.class

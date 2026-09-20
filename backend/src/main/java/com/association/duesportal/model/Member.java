@@ -35,6 +35,8 @@ public class Member {
 
     private String occupation; // Profession / Occupation
 
+    private String companyName; // Company / Association Name
+
     @Lob
     @Column(columnDefinition = "TEXT")
     private String profilePhoto; // Base64 profile photo or URL
@@ -228,6 +230,14 @@ public class Member {
 
     public void setResetToken(String resetToken) {
         this.resetToken = resetToken;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public java.time.LocalDateTime getResetTokenExpiry() {

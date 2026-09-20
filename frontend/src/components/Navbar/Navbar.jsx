@@ -71,6 +71,26 @@ export default function Navbar({
     return `${f}${l}`.toUpperCase() || 'U';
   };
 
+  const getCompanyDisplay = () => {
+    const full = currentUser?.companyName || 'Peace & Love';
+    const sub = currentUser?.companyName ? '' : 'Adroabaa';
+    
+    // Short company name for mobile devices (e.g. P & L or short name)
+    let short = 'P & L';
+    if (currentUser?.companyName) {
+      const words = currentUser.companyName.trim().split(/\s+/);
+      if (words.length > 1) {
+        short = words.map(w => w[0]).join('').toUpperCase();
+        if (short.length > 4) short = words[0];
+      } else {
+        short = words[0].substring(0, 6);
+      }
+    }
+    return { full, sub, short };
+  };
+
+  const companyInfo = getCompanyDisplay();
+
   return (
     <header className="portal-navbar">
       <div className="navbar-left">
@@ -87,8 +107,11 @@ export default function Navbar({
             <Building2 size={22} className="brand-icon" />
           </div>
           <div className="brand-text">
-            <span className="brand-title">Peace & Love</span>
-            <span className="brand-subtitle">Adroabaa</span>
+            <span className="brand-title brand-title-full">{companyInfo.full}</span>
+            <span className="brand-title brand-title-short">{companyInfo.short}</span>
+            {companyInfo.sub && (
+              <span className="brand-subtitle">{companyInfo.sub}</span>
+            )}
           </div>
         </div>
 

@@ -24,19 +24,26 @@ public class AdminRegisterRequestDTO {
 
     private String role = "ADMIN"; // ADMIN or TREASURER
 
+    private String companyName; // Company / Association Name
+
     private String adminPasskey; // Optional association admin authorization passkey
 
     public AdminRegisterRequestDTO() {
     }
 
-    public AdminRegisterRequestDTO(String firstName, String lastName, String email, String phone, String password, String role, String adminPasskey) {
+    public AdminRegisterRequestDTO(String firstName, String lastName, String email, String phone, String password, String role, String companyName, String adminPasskey) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.password = password;
         this.role = role != null ? role : "ADMIN";
+        this.companyName = companyName;
         this.adminPasskey = adminPasskey;
+    }
+
+    public AdminRegisterRequestDTO(String firstName, String lastName, String email, String phone, String password, String role, String adminPasskey) {
+        this(firstName, lastName, email, phone, password, role, null, adminPasskey);
     }
 
     public String getFirstName() {
@@ -85,6 +92,14 @@ public class AdminRegisterRequestDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public String getAdminPasskey() {

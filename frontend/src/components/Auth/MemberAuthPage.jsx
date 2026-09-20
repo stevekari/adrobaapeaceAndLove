@@ -905,15 +905,15 @@ export default function MemberAuthPage({ onLoginSuccess, onSwitchToAdmin, showTo
           )}
         </div>
 
-        {/* Distinct Secretariat Admin Secluded Portal Link */}
+        {/* Distinct Secretariat Admin & Company Registration Link */}
         <div className="admin-portal-secluded-link">
           <button 
             type="button" 
             className="secluded-admin-btn"
             onClick={onSwitchToAdmin}
           >
-            <ShieldCheck size={15} />
-            <span>Secretariat & Administrator Portal Access →</span>
+            <Building2 size={15} />
+            <span>🏢 Register Company / Administrator Portal Access →</span>
           </button>
         </div>
       </div>

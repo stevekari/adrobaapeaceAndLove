@@ -17,6 +17,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { useTranslation } from '../../i18n/LanguageContext';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import LanguageSelector from '../Navbar/LanguageSelector';
 import './Sidebar.css';
 
 export default function Sidebar({ 
@@ -237,6 +239,18 @@ export default function Sidebar({
                 className="footer-progress-fill" 
                 style={{ width: `${Math.min(100, stats?.collectionRate || 0)}%` }} 
               />
+            </div>
+          </div>
+
+          {/* Mobile Quick Appearance & Language */}
+          <div className="sidebar-quick-settings">
+            <div className="sidebar-setting-item">
+              <span className="setting-label">{t('common.theme') || 'Theme'}</span>
+              <ThemeToggle showLabel={true} />
+            </div>
+            <div className="sidebar-setting-item">
+              <span className="setting-label">{t('common.language') || 'Language'}</span>
+              <LanguageSelector />
             </div>
           </div>
 

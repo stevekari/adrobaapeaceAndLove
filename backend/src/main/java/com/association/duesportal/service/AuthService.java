@@ -99,6 +99,9 @@ public class AuthService {
         admin.setLastName(request.getLastName().trim());
         admin.setEmail(request.getEmail().trim().toLowerCase(Locale.ROOT));
         admin.setPhone(request.getPhone() != null ? request.getPhone().trim() : null);
+        admin.setCompanyName(request.getCompanyName() != null && !request.getCompanyName().trim().isEmpty()
+                ? request.getCompanyName().trim()
+                : "Peace & Love, Adroabaa");
         admin.setRole(role);
         admin.setStatus("ACTIVE");
         admin.setJoinDate(LocalDate.now());
@@ -108,7 +111,7 @@ public class AuthService {
 
         Member saved = memberRepository.save(admin);
         String token = "sess-" + UUID.randomUUID().toString();
-        return new AuthResponseDTO(token, saved, "Admin registration successful! Member Code: " + memberCode);
+        return new AuthResponseDTO(token, saved, "Admin registration successful for " + admin.getCompanyName() + "! Member Code: " + memberCode);
     }
 
     public MemberCodeVerifyDTO verifyMemberCode(String code) {

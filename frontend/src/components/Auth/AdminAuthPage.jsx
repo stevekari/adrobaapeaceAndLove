@@ -12,7 +12,8 @@ import {
   Shield, 
   AlertCircle, 
   ArrowLeft,
-  KeyRound
+  KeyRound,
+  Building2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../../services/api';
@@ -35,7 +36,8 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
   const [loginError, setLoginError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Admin Register Form State (Only if no admin exists yet)
+  // Admin / Company Register Form State
+  const [adminCompanyName, setAdminCompanyName] = useState('Peace & Love, Adroabaa');
   const [adminFirstName, setAdminFirstName] = useState('');
   const [adminLastName, setAdminLastName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
@@ -249,12 +251,13 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
         lastName: adminLastName.trim(),
         email: adminEmail.trim(),
         phone: adminPhone.trim(),
+        companyName: adminCompanyName.trim() || 'Peace & Love, Adroabaa',
         role: 'ADMIN',
         password: adminPassword,
       });
 
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-      showToast('Administrator Registered!', `Admin account created. Member Code: ${authData.memberCode}`, 'success');
+      showToast('Administrator Registered!', `Admin account created for ${adminCompanyName.trim() || 'Peace & Love, Adroabaa'}. Member Code: ${authData.memberCode}`, 'success');
       onLoginSuccess(authData);
     } catch (err) {
       setAdminError(err.message || 'Admin registration failed.');
@@ -311,8 +314,8 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
             className={`auth-tab-btn ${activeTab === 'register' ? 'active' : ''}`}
             onClick={() => { setActiveTab('register'); setAdminError(''); }}
           >
-            <Shield size={17} />
-            <span>Register Admin</span>
+            <Building2 size={17} />
+            <span>Register Admin / Company</span>
           </button>
         </div>
 
@@ -630,16 +633,16 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
             </div>
           )}
 
-          {/* ================= 2. ADMIN REGISTRATION TAB (ALLOWS MULTIPLE ADMINS) ================= */}
+          {/* ================= 2. ADMIN & COMPANY REGISTRATION TAB ================= */}
           {activeTab === 'register' && (
             <div className="auth-tab-pane animate-fade-in">
               <div className="auth-card-title-box">
                 <div className="admin-badge-pill">
                   <ShieldCheck size={14} />
-                  <span>Executive Administration</span>
+                  <span>Executive Administration & Company Setup</span>
                 </div>
-                <h2>Register Administrator</h2>
-                <p>Create and activate an executive administrator account for Peace & Love, Adroabaa.</p>
+                <h2>Register Company & Administrator</h2>
+                <p>Register your company or association. The registering person is automatically granted default <strong>Administrator (ADMIN)</strong> privileges.</p>
               </div>
 
               {adminError && (
@@ -650,9 +653,23 @@ export default function AdminAuthPage({ onLoginSuccess, onSwitchToMember, showTo
               )}
 
               <form onSubmit={handleAdminRegister} className="auth-form">
+                <div className="auth-input-group">
+                  <label>Company / Association Name <span className="req">*</span></label>
+                  <div className="auth-input-wrapper">
+                    <Building2 size={17} className="input-icon" />
+                    <input 
+                      type="text"
+                      placeholder="e.g. Peace & Love, Adroabaa"
+                      value={adminCompanyName}
+                      onChange={(e) => setAdminCompanyName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="auth-row-2">
                   <div className="auth-input-group">
-                    <label>First Name <span className="req">*</span></label>
+                    <label>Admin First Name <span className="req">*</span></label>
                     <div className="auth-input-wrapper">
                       <User size={17} className="input-icon" />
                       <input 

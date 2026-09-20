@@ -131,3 +131,18 @@
 .language-selector-wrapper.compact .lang-name {
   display: none;
 }
+
+@media (max-width: 768px) {
+  .language-trigger-btn {
+    padding: 5px 7px;
+    gap: 3px;
+  }
+
+  .lang-name {
+    display: none;
+  }
+
+  .lang-flag {
+    font-size: 1.1rem;
+  }
+}

@@ -87,3 +87,25 @@
 [data-theme="dark"] .theme-toggle-label {
   color: var(--slate-300, #cbd5e1);
 }
+
+@media (max-width: 768px) {
+  .theme-toggle-track {
+    width: 44px;
+    height: 24px;
+    padding: 2px;
+  }
+
+  .theme-toggle-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  .theme-toggle-btn.dark .theme-toggle-thumb {
+    transform: translateX(20px);
+  }
+
+  .sun-icon, .moon-icon {
+    width: 13px;
+    height: 13px;
+  }
+}

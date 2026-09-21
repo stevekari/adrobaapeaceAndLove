@@ -44,17 +44,25 @@ export default function NotificationDrawer({
     }
   }, [isOpen, currentUser]);
 
-  // Click outside to close
+  // Click outside to close (supporting mouse and touch devices)
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target)) {
-        onClose();
+        // Prevent immediate close if user tapped the bell button itself
+        const bellBtn = e.target.closest('.navbar-bell-wrapper');
+        if (!bellBtn) {
+          onClose();
+        }
       }
     };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside, { passive: true });
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [isOpen, onClose]);
 
   const handleNotificationClick = async (n) => {
